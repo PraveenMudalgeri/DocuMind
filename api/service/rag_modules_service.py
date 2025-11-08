@@ -103,11 +103,11 @@ class RAGModulesService:
             logger.error(f"Error in pre-retrieval (HyDE) module: {e}")
             return query  # Fallback to original query
 
-    async def retrieval_module(self, query: str, top_k: int = 10) -> List[Dict[str, Any]]:
+    async def retrieval_module(self, query: str, top_k: int = 10, username: str = None) -> List[Dict[str, Any]]:
         """
         [Module: Retrieval] Retrieves relevant PARENT chunks using the Small-to-Big strategy.
         1. Embed the (potentially enhanced) query.
-        2. Retrieve the top_k CHILD chunks from Pinecone.
+        2. Retrieve the top_k CHILD chunks from Pinecone (filtered by username if provided).
         3. Fetch the corresponding PARENT chunks linked to these child chunks.
 
         Concept from Paper: Small-to-Big Retrieval
@@ -118,11 +118,14 @@ class RAGModulesService:
                 logger.warning("Failed to get query embedding")
                 return []
 
-            # 1. Retrieve the top CHILD chunks
-            child_results = await pinecone_service.query_vectors(query_embedding, top_k)
+            # 1. Retrieve the top CHILD chunks (filtered by username)
+            child_results = await pinecone_service.query_vectors(query_embedding, top_k, username=username)
             
             if not child_results:
-                logger.warning("No child chunks retrieved from vector search")
+                if username:
+                    logger.warning(f"No child chunks retrieved for user '{username}'")
+                else:
+                    logger.warning("No child chunks retrieved from vector search")
                 return []
             
             # 2. Get the unique IDs of the parent chunks
@@ -145,7 +148,7 @@ class RAGModulesService:
                 logger.warning("No parent chunks found in document store")
                 return []
             
-            logger.info(f"Retrieved {len(parent_chunks)} parent chunks for query")
+            logger.info(f"Retrieved {len(parent_chunks)} parent chunks for user '{username or 'all users'}'")
             return list(parent_chunks.values())
             
         except Exception as e:
@@ -186,25 +189,59 @@ class RAGModulesService:
             context_parts = [chunk.get("metadata", {}).get("content", "") for chunk in context_chunks]
             context = "\n\n---\n\n".join(context_parts)
             
-            prompt = f"""
-            You are a helpful assistant. Your task is to answer the user's question based *only* on the provided context.
-            Do not use any external knowledge. If the answer is not contained within the text below, state "The answer is not available in the provided context."
+            prompt = f"""You are a helpful assistant. Your task is to answer the user's question based ONLY on the provided context.
 
-            Provided Context:
-            {context}
+IMPORTANT FORMATTING RULES:
+- Write your answer in plain text format WITHOUT any Markdown formatting
+- Do NOT use asterisks (*) for bold or bullet points
+- Do NOT use double asterisks (**) for headers or emphasis
+- Do NOT use hash symbols (#) for headers
+- Use simple dashes (-) or numbers (1., 2., 3.) for lists if needed
+- Write in clear, natural paragraphs
 
-            Question: {query}
+If the answer is not contained within the context below, state "The answer is not available in the provided context."
 
-            Answer:
-            """
+Provided Context:
+{context}
+
+Question: {query}
+
+Answer (in plain text without Markdown formatting):"""
             
             answer = await gemini_service.generate_answer(prompt)
+            
+            # Additional cleanup: Remove any Markdown formatting that might still appear
+            answer = self._remove_markdown_formatting(answer)
+            
             logger.info(f"Generated answer for query: {query[:50]}...")
             return answer
             
         except Exception as e:
             logger.error(f"Error in generation module: {e}")
             return "I apologize, but I encountered an error while generating the answer."
+    
+    def _remove_markdown_formatting(self, text: str) -> str:
+        """
+        Helper method to remove common Markdown formatting from text.
+        """
+        # Remove bold formatting (**text** or __text__)
+        text = re.sub(r'\*\*(.+?)\*\*', r'\1', text)
+        text = re.sub(r'__(.+?)__', r'\1', text)
+        
+        # Remove italic formatting (*text* or _text_)
+        text = re.sub(r'\*(.+?)\*', r'\1', text)
+        text = re.sub(r'_(.+?)_', r'\1', text)
+        
+        # Remove headers (# or ## or ### etc.)
+        text = re.sub(r'^#{1,6}\s+', '', text, flags=re.MULTILINE)
+        
+        # Remove inline code (`code`)
+        text = re.sub(r'`(.+?)`', r'\1', text)
+        
+        # Remove code blocks (```code```)
+        text = re.sub(r'```[a-z]*\n(.+?)\n```', r'\1', text, flags=re.DOTALL)
+        
+        return text.strip()
 
     def _chunk_document_small_to_big(self, content: str, title: str) -> Tuple[List[Dict], List[Dict]]:
         """

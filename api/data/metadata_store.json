@@ -592,7 +592,61 @@
     "child_a230463514254365ace5704f6e95211d",
     "child_74c2049acdcf49f6aeb43ac101422c29",
     "child_8f98e0094ade4165bd28864d4345369f",
-    "child_9e83a923953941b68df415c5fee11d78"
+    "child_9e83a923953941b68df415c5fee11d78",
+    "child_025ae641b9774c82a5717171c4761a1d",
+    "child_300c26fdc41a4fa99d76a569fbc3fd69",
+    "child_ad6b437c4707443c9fe92e8595913187",
+    "child_e7df0d8eeb7241d297ab054ecaf7f9f9",
+    "child_adb486fdc59b4266a1ac0c9acc5d173a",
+    "child_f0665e1fcd614d0f987a68d6a7c88b86",
+    "child_1139ffc03d6440c5bd0830b252268462",
+    "child_f53d632c9b4742139c46465a5412b1bd",
+    "child_2600cbe380554bd2a29831c8e130cc48",
+    "child_3681c7d10e6c408a82535c8c6d06775a",
+    "child_c3a98da851604faa8521e7952604964d",
+    "child_19eb0566de774fceacc8147f11d6b1da",
+    "child_010cd9df0afa427b963b4859074bb849",
+    "child_e08434df3e0c40eda6e522e75511a49e",
+    "child_8afe2e07393c4b9d9e44e67a164d27f1",
+    "child_93990a416ee84e65836d5dfb2e0088a1",
+    "child_68c333a0ab644e8f8a5dcd7ce330e66c",
+    "child_08fe108965714b91bbe921c28e2af3b7",
+    "child_a1866e8d301e40babbf297b3f6e0c8b3",
+    "child_42b4b7ed488546498f78a5c6c49521e3",
+    "child_2324dee29b8a424e81971dd7a0db7414",
+    "child_fd1084838f6d4f75a320b09698a7a327",
+    "child_4e8e7dcd4a50406f9e9bd79b5724ffbc",
+    "child_add6f6a81ba1417880aadfa1f7fed823",
+    "child_2dc59291a29044d188c2126489acbac6",
+    "child_982f7bbebafe433aaa73add22a753a3d",
+    "child_ad2f241aed264bb8a8065b92aa18da28",
+    "child_875825861e714ccf99f84f7fa44227d8",
+    "child_7c3f8dd0000e46d1a1be4500fc77be93",
+    "child_aeb87cea25cf4d4aaa564e2c7506b402",
+    "child_45e2868892474f3ca7ad0b3164cde8dc",
+    "child_916661c17d084a4fb64e92bd2b2b2fa1",
+    "child_a362e38a6ee1497aaaa65396daab352a",
+    "child_1475b994bc6246d0b849a96a76d05538",
+    "child_9f4768146271474bb2379ddafccf55c7",
+    "child_ecaf3d9442f44b8494477f3f67534e5d",
+    "child_374cf111f0004ea3984765f5e7a0f8ff",
+    "child_5afe539868544855bc73d2a566729276",
+    "child_2e6496883e8747a4b978c592636ba370",
+    "child_2b53b1785e66477186e9453e1378dc30",
+    "child_9a8ef9cfae41412ead93b7a45a1cd88b",
+    "child_bb80474b6a344760af9671c5f73e0380",
+    "child_e0a79f274b544335a959f42a5b0d32c8",
+    "child_f23166ef65a248d9bffb391aa8d966e6",
+    "child_f0990056fb6c444cb9d87c36c3b701ee",
+    "child_c4d029c78bbb4d7e99a0a7f583890fe6",
+    "child_678810b496ab48e3a18b0d43f71bd3f8",
+    "child_1dc95ee946734cb7a2d664d6573cd210",
+    "child_8899647fd45a4e2381fe11d5254cd002",
+    "child_a00f3e62d10442c983d25d6f1037cb43",
+    "child_01b3808214fe44a2b870204e0c35629b",
+    "child_d09695513def450586d764b361340666",
+    "child_802677754ca84947a990dc2ffa8dda10",
+    "child_7196923fbee54895bcd3384208994b29"
   ],
   "metadata_store": {
     "child_478c341a73374dfcb87eab124c64da04": {
@@ -5632,6 +5686,492 @@
       "is_fallback": true,
       "source_filename": "SH04-RM - IPR-NOTES-UNIT-I.pdf",
       "username": "admin"
+    },
+    "child_025ae641b9774c82a5717171c4761a1d": {
+      "content": "\u201cGuess the Logo\u02ee or \u201cInventor\u02bcs Round\u02ee\n\ud83c\udfaf  Objective\nTo test participants\u02bc knowledge of technology companies, inventions, and inventors in a fun and \ncompetitive way.",
+      "parent_id": "parent_0e8e82a7f5524fcd890acb8112114742",
+      "title": "events",
+      "chunk_index": 0,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_300c26fdc41a4fa99d76a569fbc3fd69": {
+      "content": "\ud83e\udde0 Event Concept\nParticipants (solo or in teams of 2\ue0893\ue082 are shown:\nLogos of tech companies (like NVIDIA, SpaceX, Intel, etc.), or\nPhotos or clues about famous inventors/scientists (like Nikola Tesla, James Watt, Tim \nBerners-Lee, etc.),\nand they must guess the correct name within the time limit.",
+      "parent_id": "parent_0e8e82a7f5524fcd890acb8112114742",
+      "title": "events",
+      "chunk_index": 1,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_ad6b437c4707443c9fe92e8595913187": {
+      "content": "\ud83d\udd79  Round Ideas\nRound 1 \u2013 Logo Blitz\nShow 20\ue08925 logos (some slightly blurred or partial).",
+      "parent_id": "parent_0e8e82a7f5524fcd890acb8112114742",
+      "title": "events",
+      "chunk_index": 2,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_e7df0d8eeb7241d297ab054ecaf7f9f9": {
+      "content": "Each question is timed (e.g., 10 seconds).",
+      "parent_id": "parent_0e8e82a7f5524fcd890acb8112114742",
+      "title": "events",
+      "chunk_index": 3,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_adb486fdc59b4266a1ac0c9acc5d173a": {
+      "content": "Correct answer = \ue09d10 points.",
+      "parent_id": "parent_0e8e82a7f5524fcd890acb8112114742",
+      "title": "events",
+      "chunk_index": 4,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_f0665e1fcd614d0f987a68d6a7c88b86": {
+      "content": "\ud83e\udde9 Twist Ideas:\n\u201cHalf Logo\u02ee (only a part shown)\n\u201cOld vs.",
+      "parent_id": "parent_0e8e82a7f5524fcd890acb8112114742",
+      "title": "events",
+      "chunk_index": 5,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_1139ffc03d6440c5bd0830b252268462": {
+      "content": "New Logo\u02ee \u2013 identify the brand from its older version\n\u201cMascot Mania\u02ee \u2013 identify the brand by its character (e.g., Android, GitHub Octocat)\nRound 2 \u2013 Inventor\u02bcs Round\nShow a picture, invention, or a clue.",
+      "parent_id": "parent_0e8e82a7f5524fcd890acb8112114742",
+      "title": "events",
+      "chunk_index": 6,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_f53d632c9b4742139c46465a5412b1bd": {
+      "content": "Example: \u201cInvented the World Wide Web\u02ee \u2192 Tim Berners-Lee\n\u201cCreated the first pro",
+      "parent_id": "parent_0e8e82a7f5524fcd890acb8112114742",
+      "title": "events",
+      "chunk_index": 7,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_2600cbe380554bd2a29831c8e130cc48": {
+      "content": "Example: \u201cInvented the World Wide Web\u02ee \u2192 Tim Berners-Lee\n\u201cCreated the first programmable computer\u02ee \u2192 Charles Babbage\n\u201cKnown for Tesla Coil\u02ee \u2192 Nikola Tesla\nCan also include connect-the-dots style questions:\n\u201cPython \ue1d7 Google \ue1d7 TensorFlow \ue1d7 ?\u02ee \ue081Answer: Guido van Rossum / AI field)\nRound 3 \u2013 Rapid Fire (Final Round)\nTop teams face a buzzer round.",
+      "parent_id": "parent_c6bea402f61a42738be4835de721e3a4",
+      "title": "events",
+      "chunk_index": 8,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_3681c7d10e6c408a82535c8c6d06775a": {
+      "content": "Fastest correct answer gets 10 points; wrong answer \ue09e5.",
+      "parent_id": "parent_c6bea402f61a42738be4835de721e3a4",
+      "title": "events",
+      "chunk_index": 9,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_c3a98da851604faa8521e7952604964d": {
+      "content": "Ev ent Ide as\n1\ud83c\udfc6  Judging Criteria\nAccuracy of answers\nQuickness of response (tie-breaker)\nIn case of a tie \u2014 bonus round (identify logo by tagline or product clue)\n\ud83e\uddf0 Requirements\nLaptop/projector\nPowerPoint / Canva slides for logos\nBuzzer (or online buzzer app like BuzzIn.Live)\nScoreboard\n\ud83d\udd27  2.",
+      "parent_id": "parent_c6bea402f61a42738be4835de721e3a4",
+      "title": "events",
+      "chunk_index": 10,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_19eb0566de774fceacc8147f11d6b1da": {
+      "content": "\u201cBuild It With Junk\u02ee Challenge\n\ud83c\udfaf  Objective\nEncourage participants to apply creativity, basic engineering principles, and teamwork by building \nsomething functional or cool using scrap or waste materials.",
+      "parent_id": "parent_c6bea402f61a42738be4835de721e3a4",
+      "title": "events",
+      "chunk_index": 11,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_010cd9df0afa427b963b4859074bb849": {
+      "content": "\ud83d\udca1  Event Concept\nTeams are given a set of junk materials (like wires, plasti",
+      "parent_id": "parent_c6bea402f61a42738be4835de721e3a4",
+      "title": "events",
+      "chunk_index": 12,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_e08434df3e0c40eda6e522e75511a49e": {
+      "content": "rap or waste materials.",
+      "parent_id": "parent_c65ec42b07ec48a882efa0ccc1c55f01",
+      "title": "events",
+      "chunk_index": 13,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_8afe2e07393c4b9d9e44e67a164d27f1": {
+      "content": "\ud83d\udca1  Event Concept\nTeams are given a set of junk materials (like wires, plastic bottles, cardboard, straws, motors, etc.) \nand a theme.",
+      "parent_id": "parent_c65ec42b07ec48a882efa0ccc1c55f01",
+      "title": "events",
+      "chunk_index": 14,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_93990a416ee84e65836d5dfb2e0088a1": {
+      "content": "They must create a working prototype or model within the time limit.",
+      "parent_id": "parent_c65ec42b07ec48a882efa0ccc1c55f01",
+      "title": "events",
+      "chunk_index": 15,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_68c333a0ab644e8f8a5dcd7ce330e66c": {
+      "content": "\ud83d\udee0  Example Themes\n\u201cEco-friendly Innovation\u02ee \u2013 make a mini windmill or water filter using junk.",
+      "parent_id": "parent_c65ec42b07ec48a882efa0ccc1c55f01",
+      "title": "events",
+      "chunk_index": 16,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_08fe108965714b91bbe921c28e2af3b7": {
+      "content": "\u201cSmart Engineering\u02ee \u2013 create a simple mechanical tool, pulley system, or robotic arm.",
+      "parent_id": "parent_c65ec42b07ec48a882efa0ccc1c55f01",
+      "title": "events",
+      "chunk_index": 17,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_a1866e8d301e40babbf297b3f6e0c8b3": {
+      "content": "\u201cCreative Structures\u02ee \u2013 bridges, towers, or vehicles using only scrap.",
+      "parent_id": "parent_c65ec42b07ec48a882efa0ccc1c55f01",
+      "title": "events",
+      "chunk_index": 18,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_42b4b7ed488546498f78a5c6c49521e3": {
+      "content": "\u201cSave the Planet\u02ee \u2013 something that demonstrates recycling or energy saving.",
+      "parent_id": "parent_c65ec42b07ec48a882efa0ccc1c55f01",
+      "title": "events",
+      "chunk_index": 19,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_2324dee29b8a424e81971dd7a0db7414": {
+      "content": "\u23f0  Format\nTeams of 3\ue0895 members.",
+      "parent_id": "parent_c65ec42b07ec48a882efa0ccc1c55f01",
+      "title": "events",
+      "chunk_index": 20,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_fd1084838f6d4f75a320b09698a7a327": {
+      "content": "Duration: 60\ue08990 minutes.",
+      "parent_id": "parent_c65ec42b07ec48a882efa0ccc1c55f01",
+      "title": "events",
+      "chunk_index": 21,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_4e8e7dcd4a50406f9e9bd79b5724ffbc": {
+      "content": "All materials must be either provided on the spot or brought as scrap from home.",
+      "parent_id": "parent_c65ec42b07ec48a882efa0ccc1c55f01",
+      "title": "events",
+      "chunk_index": 22,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_add6f6a81ba1417880aadfa1f7fed823": {
+      "content": "No ready-made kits allowed.",
+      "parent_id": "parent_c65ec42b07ec48a882efa0ccc1c55f01",
+      "title": "events",
+      "chunk_index": 23,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_2dc59291a29044d188c2126489acbac6": {
+      "content": "\ud83e\uddc3  Material Examples\nEv ent Ide as\n2Plastic bottles, old CDs, cardboard boxes\nRubber bands, straws, tape, old wires\nIce cream sticks, syringes, balloons, old motors, etc.",
+      "parent_id": "parent_c65ec42b07ec48a882efa0ccc1c55f01",
+      "title": "events",
+      "chunk_index": 24,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_982f7bbebafe433aaa73add22a753a3d": {
+      "content": "\ud83e\udde9 Judging Criteria\nCr it er ia Descr iption \n\ud83d\udca1  Creativity & Innovation Unique idea and use of materials\n\u2699",
+      "parent_id": "parent_c65ec42b07ec48a882efa0ccc1c55f01",
+      "title": "events",
+      "chunk_index": 25,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_ad2f241aed264bb8a8065b92aa18da28": {
+      "content": "g Criteria\nCr it er ia Descr iption \n\ud83d\udca1  Creativity & Innovation Unique idea and use of materials\n\u2699  Functionality How well it works or demonstrates a concept\n\ud83c\udf31  Theme Relevance How it connects with the given theme\n\ud83c\udfa8  Aesthetics Neatness, stability, and overall look\n\ud83e\uddd1\u200d\ud83e\udd1d\u200d\ud83e\uddd1  Teamwork & PresentationCoordination and explanation of idea\n\ud83e\uddf0 Requirements\nTables, workspace area\nBasic tools (scissors, tape, glue gun)\nOptional: fans, lights, or battery sources (if needed)\nJudges: Faculty or seniors from mechanical/electrical background\n\ud83c\udfc6  Prizes / Add-ons\nBest Creative Build\nBest Functional Prototype\nGreen Engineer Award (eco-friendly design)\nEv ent Ide as\n3",
+      "parent_id": "parent_a797d9980d914c308592570b3b55c3d2",
+      "title": "events",
+      "chunk_index": 26,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_875825861e714ccf99f84f7fa44227d8": {
+      "content": "\u201cGuess the Logo\u02ee or \u201cInventor\u02bcs Round\u02ee\n\ud83c\udfaf  Objective\nTo test participants\u02bc knowledge of technology companies, inventions, and inventors in a fun and \ncompetitive way.",
+      "parent_id": "parent_50d67aa638ac400c8e3bfd6a0e2eb4f8",
+      "title": "events",
+      "chunk_index": 0,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_7c3f8dd0000e46d1a1be4500fc77be93": {
+      "content": "\ud83e\udde0 Event Concept\nParticipants (solo or in teams of 2\ue0893\ue082 are shown:\nLogos of tech companies (like NVIDIA, SpaceX, Intel, etc.), or\nPhotos or clues about famous inventors/scientists (like Nikola Tesla, James Watt, Tim \nBerners-Lee, etc.),\nand they must guess the correct name within the time limit.",
+      "parent_id": "parent_50d67aa638ac400c8e3bfd6a0e2eb4f8",
+      "title": "events",
+      "chunk_index": 1,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_aeb87cea25cf4d4aaa564e2c7506b402": {
+      "content": "\ud83d\udd79  Round Ideas\nRound 1 \u2013 Logo Blitz\nShow 20\ue08925 logos (some slightly blurred or partial).",
+      "parent_id": "parent_50d67aa638ac400c8e3bfd6a0e2eb4f8",
+      "title": "events",
+      "chunk_index": 2,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_45e2868892474f3ca7ad0b3164cde8dc": {
+      "content": "Each question is timed (e.g., 10 seconds).",
+      "parent_id": "parent_50d67aa638ac400c8e3bfd6a0e2eb4f8",
+      "title": "events",
+      "chunk_index": 3,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_916661c17d084a4fb64e92bd2b2b2fa1": {
+      "content": "Correct answer = \ue09d10 points.",
+      "parent_id": "parent_50d67aa638ac400c8e3bfd6a0e2eb4f8",
+      "title": "events",
+      "chunk_index": 4,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_a362e38a6ee1497aaaa65396daab352a": {
+      "content": "\ud83e\udde9 Twist Ideas:\n\u201cHalf Logo\u02ee (only a part shown)\n\u201cOld vs.",
+      "parent_id": "parent_50d67aa638ac400c8e3bfd6a0e2eb4f8",
+      "title": "events",
+      "chunk_index": 5,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_1475b994bc6246d0b849a96a76d05538": {
+      "content": "New Logo\u02ee \u2013 identify the brand from its older version\n\u201cMascot Mania\u02ee \u2013 identify the brand by its character (e.g., Android, GitHub Octocat)\nRound 2 \u2013 Inventor\u02bcs Round\nShow a picture, invention, or a clue.",
+      "parent_id": "parent_50d67aa638ac400c8e3bfd6a0e2eb4f8",
+      "title": "events",
+      "chunk_index": 6,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_9f4768146271474bb2379ddafccf55c7": {
+      "content": "Example: \u201cInvented the World Wide Web\u02ee \u2192 Tim Berners-Lee\n\u201cCreated the first pro",
+      "parent_id": "parent_50d67aa638ac400c8e3bfd6a0e2eb4f8",
+      "title": "events",
+      "chunk_index": 7,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_ecaf3d9442f44b8494477f3f67534e5d": {
+      "content": "Example: \u201cInvented the World Wide Web\u02ee \u2192 Tim Berners-Lee\n\u201cCreated the first programmable computer\u02ee \u2192 Charles Babbage\n\u201cKnown for Tesla Coil\u02ee \u2192 Nikola Tesla\nCan also include connect-the-dots style questions:\n\u201cPython \ue1d7 Google \ue1d7 TensorFlow \ue1d7 ?\u02ee \ue081Answer: Guido van Rossum / AI field)\nRound 3 \u2013 Rapid Fire (Final Round)\nTop teams face a buzzer round.",
+      "parent_id": "parent_fb6d48463be74a29a893133af341d475",
+      "title": "events",
+      "chunk_index": 8,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_374cf111f0004ea3984765f5e7a0f8ff": {
+      "content": "Fastest correct answer gets 10 points; wrong answer \ue09e5.",
+      "parent_id": "parent_fb6d48463be74a29a893133af341d475",
+      "title": "events",
+      "chunk_index": 9,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_5afe539868544855bc73d2a566729276": {
+      "content": "Ev ent Ide as\n1\ud83c\udfc6  Judging Criteria\nAccuracy of answers\nQuickness of response (tie-breaker)\nIn case of a tie \u2014 bonus round (identify logo by tagline or product clue)\n\ud83e\uddf0 Requirements\nLaptop/projector\nPowerPoint / Canva slides for logos\nBuzzer (or online buzzer app like BuzzIn.Live)\nScoreboard\n\ud83d\udd27  2.",
+      "parent_id": "parent_fb6d48463be74a29a893133af341d475",
+      "title": "events",
+      "chunk_index": 10,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_2e6496883e8747a4b978c592636ba370": {
+      "content": "\u201cBuild It With Junk\u02ee Challenge\n\ud83c\udfaf  Objective\nEncourage participants to apply creativity, basic engineering principles, and teamwork by building \nsomething functional or cool using scrap or waste materials.",
+      "parent_id": "parent_fb6d48463be74a29a893133af341d475",
+      "title": "events",
+      "chunk_index": 11,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_2b53b1785e66477186e9453e1378dc30": {
+      "content": "\ud83d\udca1  Event Concept\nTeams are given a set of junk materials (like wires, plasti",
+      "parent_id": "parent_fb6d48463be74a29a893133af341d475",
+      "title": "events",
+      "chunk_index": 12,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_9a8ef9cfae41412ead93b7a45a1cd88b": {
+      "content": "rap or waste materials.",
+      "parent_id": "parent_78d55faf2d9449a0a95fd525943bd0d7",
+      "title": "events",
+      "chunk_index": 13,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_bb80474b6a344760af9671c5f73e0380": {
+      "content": "\ud83d\udca1  Event Concept\nTeams are given a set of junk materials (like wires, plastic bottles, cardboard, straws, motors, etc.) \nand a theme.",
+      "parent_id": "parent_78d55faf2d9449a0a95fd525943bd0d7",
+      "title": "events",
+      "chunk_index": 14,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_e0a79f274b544335a959f42a5b0d32c8": {
+      "content": "They must create a working prototype or model within the time limit.",
+      "parent_id": "parent_78d55faf2d9449a0a95fd525943bd0d7",
+      "title": "events",
+      "chunk_index": 15,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_f23166ef65a248d9bffb391aa8d966e6": {
+      "content": "\ud83d\udee0  Example Themes\n\u201cEco-friendly Innovation\u02ee \u2013 make a mini windmill or water filter using junk.",
+      "parent_id": "parent_78d55faf2d9449a0a95fd525943bd0d7",
+      "title": "events",
+      "chunk_index": 16,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_f0990056fb6c444cb9d87c36c3b701ee": {
+      "content": "\u201cSmart Engineering\u02ee \u2013 create a simple mechanical tool, pulley system, or robotic arm.",
+      "parent_id": "parent_78d55faf2d9449a0a95fd525943bd0d7",
+      "title": "events",
+      "chunk_index": 17,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_c4d029c78bbb4d7e99a0a7f583890fe6": {
+      "content": "\u201cCreative Structures\u02ee \u2013 bridges, towers, or vehicles using only scrap.",
+      "parent_id": "parent_78d55faf2d9449a0a95fd525943bd0d7",
+      "title": "events",
+      "chunk_index": 18,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_678810b496ab48e3a18b0d43f71bd3f8": {
+      "content": "\u201cSave the Planet\u02ee \u2013 something that demonstrates recycling or energy saving.",
+      "parent_id": "parent_78d55faf2d9449a0a95fd525943bd0d7",
+      "title": "events",
+      "chunk_index": 19,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_1dc95ee946734cb7a2d664d6573cd210": {
+      "content": "\u23f0  Format\nTeams of 3\ue0895 members.",
+      "parent_id": "parent_78d55faf2d9449a0a95fd525943bd0d7",
+      "title": "events",
+      "chunk_index": 20,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_8899647fd45a4e2381fe11d5254cd002": {
+      "content": "Duration: 60\ue08990 minutes.",
+      "parent_id": "parent_78d55faf2d9449a0a95fd525943bd0d7",
+      "title": "events",
+      "chunk_index": 21,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_a00f3e62d10442c983d25d6f1037cb43": {
+      "content": "All materials must be either provided on the spot or brought as scrap from home.",
+      "parent_id": "parent_78d55faf2d9449a0a95fd525943bd0d7",
+      "title": "events",
+      "chunk_index": 22,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_01b3808214fe44a2b870204e0c35629b": {
+      "content": "No ready-made kits allowed.",
+      "parent_id": "parent_78d55faf2d9449a0a95fd525943bd0d7",
+      "title": "events",
+      "chunk_index": 23,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_d09695513def450586d764b361340666": {
+      "content": "\ud83e\uddc3  Material Examples\nEv ent Ide as\n2Plastic bottles, old CDs, cardboard boxes\nRubber bands, straws, tape, old wires\nIce cream sticks, syringes, balloons, old motors, etc.",
+      "parent_id": "parent_78d55faf2d9449a0a95fd525943bd0d7",
+      "title": "events",
+      "chunk_index": 24,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_802677754ca84947a990dc2ffa8dda10": {
+      "content": "\ud83e\udde9 Judging Criteria\nCr it er ia Descr iption \n\ud83d\udca1  Creativity & Innovation Unique idea and use of materials\n\u2699",
+      "parent_id": "parent_78d55faf2d9449a0a95fd525943bd0d7",
+      "title": "events",
+      "chunk_index": 25,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
+    },
+    "child_7196923fbee54895bcd3384208994b29": {
+      "content": "g Criteria\nCr it er ia Descr iption \n\ud83d\udca1  Creativity & Innovation Unique idea and use of materials\n\u2699  Functionality How well it works or demonstrates a concept\n\ud83c\udf31  Theme Relevance How it connects with the given theme\n\ud83c\udfa8  Aesthetics Neatness, stability, and overall look\n\ud83e\uddd1\u200d\ud83e\udd1d\u200d\ud83e\uddd1  Teamwork & PresentationCoordination and explanation of idea\n\ud83e\uddf0 Requirements\nTables, workspace area\nBasic tools (scissors, tape, glue gun)\nOptional: fans, lights, or battery sources (if needed)\nJudges: Faculty or seniors from mechanical/electrical background\n\ud83c\udfc6  Prizes / Add-ons\nBest Creative Build\nBest Functional Prototype\nGreen Engineer Award (eco-friendly design)\nEv ent Ide as\n3",
+      "parent_id": "parent_f94098b646c14a5cbfca40b099cb28f7",
+      "title": "events",
+      "chunk_index": 26,
+      "is_fallback": true,
+      "source_filename": "events.pdf",
+      "username": "Praveen"
     }
   }
 }

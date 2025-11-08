@@ -71,7 +71,8 @@ class RAGController:
             enhanced_query = await rag_modules_service.pre_retrieval_module(query)
             
             # 2. [Retrieval Module] Retrieve documents. Fetch more than needed (e.g., 2x) for the reranker to work effectively.
-            retrieved_chunks = await rag_modules_service.retrieval_module(enhanced_query, top_k=top_k * 2)
+            # Pass username to ensure user-specific document retrieval
+            retrieved_chunks = await rag_modules_service.retrieval_module(enhanced_query, top_k=top_k * 2, username=username)
 
             # Handle case where no documents are retrieved
             if not retrieved_chunks:

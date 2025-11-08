@@ -5,5 +5,12 @@
     "email": "admin@gmail.com",
     "created_at": "2025-11-07T15:47:31.830745",
     "is_active": true
+  },
+  "Praveen": {
+    "username": "Praveen",
+    "hashed_password": "UrcmXDz6f3rB8JJeEyWhb+YuxR8+Cy+cp08wBx+OCcqylkfh425oGQxPfCW9WAo2",
+    "email": "veensadds@gmail.com",
+    "created_at": "2025-11-08T03:08:03.663377",
+    "is_active": true
   }
 }

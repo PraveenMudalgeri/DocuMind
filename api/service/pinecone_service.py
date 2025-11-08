@@ -152,9 +152,10 @@ class PineconeService:
             logger.error(f"Failed to upsert vectors to FAISS: {e}")
             return False
 
-    async def query_vectors(self, query_vector: List[float], top_k: int = 5) -> List[Dict[str, Any]]:
+    async def query_vectors(self, query_vector: List[float], top_k: int = 5, username: str = None) -> List[Dict[str, Any]]:
         """
         Performs a similarity search in the local FAISS index.
+        Optionally filters results by username if provided.
         """
         if not self.index or self.index.ntotal == 0:
             logger.warning("Querying an empty or uninitialized index.")
@@ -169,8 +170,13 @@ class PineconeService:
                 logger.warning("No documents available for search.")
                 return []
             
+            # If filtering by username, we need to fetch more results and filter
+            # Search with a larger top_k if username filtering is needed
+            search_k = actual_top_k * 10 if username else actual_top_k
+            search_k = min(search_k, self.index.ntotal)
+            
             # Search the index
-            distances, indices = self.index.search(query_np, actual_top_k)
+            distances, indices = self.index.search(query_np, search_k)
             
             # Check if we got valid results
             if len(indices) == 0 or len(indices[0]) == 0:
@@ -190,6 +196,10 @@ class PineconeService:
                 vector_id = self.index_to_id_map[idx]
                 metadata = self.metadata_store.get(vector_id, {})
                 
+                # Filter by username if provided
+                if username and metadata.get('username') != username:
+                    continue
+                
                 # Convert L2 distance to a similarity score (0 to 1). Closer to 1 is more similar.
                 score = 1.0 / (1.0 + distances[0][i])
                 
@@ -198,6 +208,13 @@ class PineconeService:
                     'score': score,
                     'metadata': metadata
                 })
+                
+                # Stop once we have enough results
+                if len(results) >= top_k:
+                    break
+            
+            if username and len(results) == 0:
+                logger.warning(f"No documents found for user: {username}")
                 
             return results
         except Exception as e:
