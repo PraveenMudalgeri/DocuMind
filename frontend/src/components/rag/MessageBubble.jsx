@@ -48,7 +48,7 @@ export function MessageBubble({ type, content, sources = [], query = "" }) {
       setTimeout(() => {
         setIsCopied(false);
       }, 2000);
-    } catch (error) {
+    } catch {
       showToast({
         type: "error",
         message: "Failed to copy text. Please try again.",
