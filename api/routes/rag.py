@@ -53,8 +53,8 @@ async def index_document(
 )
 async def query_documents(
     query_request: QueryRequest,
-    session_id: Optional[str] = None,
-    documents: Optional[List[str]] = Query(None),
+    session_id: Optional[str] = Query(None, description="Session ID to save conversation"),
+    documents: Optional[List[str]] = Query(None, description="List of document IDs to filter retrieval"),
     current_user: Dict[str, Any] = Depends(get_current_user)
 ):
     """
