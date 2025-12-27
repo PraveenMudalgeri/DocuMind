@@ -1,6 +1,8 @@
 from typing import List, Dict, Any
 from lib.config import settings
 import logging
+import os
+import json
 import numpy as np
 import faiss  # FAISS for local vector search
 
@@ -15,19 +17,32 @@ class PineconeService:
     def __init__(self):
         self.index = None
         self.dimension = settings.embedding_dim  # e.g., 768 for Google's model
-        
         # Persistence paths
         self.index_path = "data/faiss_index.bin"
         self.metadata_path = "data/metadata_store.json"
         self.parent_chunks_path = "data/parent_chunks.json"
-        
         # In-memory stores
-        # Maps FAISS index position to our custom vector ID (e.g., 'child_uuid')
-        self.index_to_id_map: List[str] = []
+        # Maps FAISS ID (integer) to our custom vector ID (string like 'child_uuid')
+        self.faiss_id_to_vector_id: Dict[int, str] = {}
         # Stores metadata for each child chunk vector
         self.metadata_store: Dict[str, Dict[str, Any]] = {}
         # Stores the larger parent chunks for context retrieval
         self.parent_chunk_store: Dict[str, Dict[str, Any]] = {}
+        # Next FAISS ID to use
+        self.next_faiss_id: int = 0
+
+    async def delete_vectors_by_chunk_ids(self, chunk_ids: list) -> int:
+        """Delete all vectors and metadata for the given chunk IDs."""
+        to_remove_faiss_ids = [faiss_id for faiss_id, vector_id in self.faiss_id_to_vector_id.items() if vector_id in chunk_ids]
+        for faiss_id in to_remove_faiss_ids:
+            vector_id = self.faiss_id_to_vector_id.pop(faiss_id, None)
+            if vector_id:
+                self.metadata_store.pop(vector_id, None)
+        if self.index and to_remove_faiss_ids:
+            self.index.remove_ids(np.array(to_remove_faiss_ids, dtype='int64'))
+        await self._save_persisted_data()
+        logger.info(f"Deleted {len(to_remove_faiss_ids)} vectors from FAISS index.")
+        return len(to_remove_faiss_ids)
 
     async def initialize_pinecone(self):
         """Initializes the FAISS index and in-memory stores."""
@@ -37,10 +52,11 @@ class PineconeService:
             # Add a mapping index to FAISS for easy ID retrieval
             self.index = faiss.IndexIDMap(self.index)
             
-            # Initialize empty lists
-            self.index_to_id_map = []
+            # Initialize empty stores
+            self.faiss_id_to_vector_id = {}
             self.metadata_store = {}
             self.parent_chunk_store = {}
+            self.next_faiss_id = 0
             
             # Try to load existing data
             await self._load_persisted_data()
@@ -53,9 +69,6 @@ class PineconeService:
 
     async def _load_persisted_data(self):
         """Load persisted FAISS index and metadata from disk."""
-        import os
-        import json
-        
         try:
             # Create data directory if it doesn't exist
             os.makedirs("data", exist_ok=True)
@@ -69,8 +82,18 @@ class PineconeService:
             if os.path.exists(self.metadata_path):
                 with open(self.metadata_path, 'r') as f:
                     data = json.load(f)
-                    self.index_to_id_map = data.get('index_to_id_map', [])
+                    # Support both old format (index_to_id_map) and new format (faiss_id_to_vector_id)
+                    if 'faiss_id_to_vector_id' in data:
+                        # New format - convert string keys back to ints
+                        self.faiss_id_to_vector_id = {int(k): v for k, v in data['faiss_id_to_vector_id'].items()}
+                    elif 'index_to_id_map' in data:
+                        # Old format - convert list to dict
+                        index_to_id_map = data['index_to_id_map']
+                        self.faiss_id_to_vector_id = {i: vid for i, vid in enumerate(index_to_id_map)}
+                        logger.info("Migrated from old index_to_id_map format to faiss_id_to_vector_id")
+                    
                     self.metadata_store = data.get('metadata_store', {})
+                    self.next_faiss_id = data.get('next_faiss_id', len(self.faiss_id_to_vector_id))
                 logger.info(f"Loaded metadata from {self.metadata_path}")
             
             # Load parent chunks
@@ -78,15 +101,17 @@ class PineconeService:
                 with open(self.parent_chunks_path, 'r') as f:
                     self.parent_chunk_store = json.load(f)
                 logger.info(f"Loaded parent chunks from {self.parent_chunks_path}")
+            
+            # Validate mapping matches FAISS index
+            if self.index and self.index.ntotal > 0:
+                if len(self.faiss_id_to_vector_id) != self.index.ntotal:
+                    logger.warning(f"Index mismatch: FAISS has {self.index.ntotal} vectors but mapping has {len(self.faiss_id_to_vector_id)} entries")
                 
         except Exception as e:
             logger.warning(f"Could not load persisted data: {e}")
 
     async def _save_persisted_data(self):
         """Save FAISS index and metadata to disk."""
-        import os
-        import json
-        
         try:
             # Create data directory if it doesn't exist
             os.makedirs("data", exist_ok=True)
@@ -94,10 +119,11 @@ class PineconeService:
             # Save FAISS index
             faiss.write_index(self.index, self.index_path)
             
-            # Save metadata
+            # Save metadata with new format
             metadata_data = {
-                'index_to_id_map': self.index_to_id_map,
-                'metadata_store': self.metadata_store
+                'faiss_id_to_vector_id': {str(k): v for k, v in self.faiss_id_to_vector_id.items()},
+                'metadata_store': self.metadata_store,
+                'next_faiss_id': self.next_faiss_id
             }
             with open(self.metadata_path, 'w') as f:
                 json.dump(metadata_data, f, indent=2)
@@ -128,11 +154,15 @@ class PineconeService:
                 vector_id = vector_data['id']
                 embedding = vector_data['values']
                 
-                embeddings_to_add.append(embedding)
-                ids_to_add.append(i + len(self.index_to_id_map)) # Use a simple integer index for FAISS
+                # Assign a new FAISS ID
+                faiss_id = self.next_faiss_id
+                self.next_faiss_id += 1
                 
-                # Store the mapping and metadata
-                self.index_to_id_map.append(vector_id)
+                embeddings_to_add.append(embedding)
+                ids_to_add.append(faiss_id)
+                
+                # Store the mapping from FAISS ID to vector ID and metadata
+                self.faiss_id_to_vector_id[faiss_id] = vector_id
                 self.metadata_store[vector_id] = vector_data['metadata']
 
             if embeddings_to_add:
@@ -184,16 +214,16 @@ class PineconeService:
                 return []
             
             results = []
-            for i, idx in enumerate(indices[0]):
-                if idx == -1:  # FAISS returns -1 for no result
+            for i, faiss_id in enumerate(indices[0]):
+                if faiss_id == -1:  # FAISS returns -1 for no result
                     continue
                 
-                # Check if index is valid before accessing index_to_id_map
-                if idx >= len(self.index_to_id_map):
-                    logger.warning(f"Invalid index {idx} returned by FAISS. Max index: {len(self.index_to_id_map) - 1}")
+                # Look up vector_id using the FAISS ID
+                vector_id = self.faiss_id_to_vector_id.get(faiss_id)
+                if not vector_id:
+                    logger.warning(f"FAISS ID {faiss_id} not found in mapping")
                     continue
                 
-                vector_id = self.index_to_id_map[idx]
                 metadata = self.metadata_store.get(vector_id, {})
                 
                 # Filter by username if provided

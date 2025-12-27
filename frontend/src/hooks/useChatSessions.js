@@ -113,6 +113,12 @@ export function useChatSessions() {
     deleteSession,
     selectSession,
     refreshSessions: loadSessions,
-    refreshCurrentSession: () => loadSession(currentSessionId)
+    refreshCurrentSession: async () => {
+      // Refresh both current session and sessions list (for title update)
+      await Promise.all([
+        loadSession(currentSessionId),
+        loadSessions()
+      ]);
+    }
   };
 }

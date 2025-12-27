@@ -10,7 +10,7 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+# lib/ (Removed from ignore list to allow project utility files)
 lib64/
 parts/
 sdist/

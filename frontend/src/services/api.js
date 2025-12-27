@@ -3,7 +3,7 @@ import { API_URL } from '../utils/constants';
 
 const api = axios.create({
   baseURL: API_URL,
-  timeout: 30000,
+  timeout: 120000, // Increased to 2 minutes for long-running queries
   headers: {
     'Content-Type': 'application/json'
   }

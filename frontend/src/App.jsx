@@ -4,11 +4,12 @@ import { ToastProvider } from './context/ToastContext';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { HomePage } from './pages/HomePage';
-import { LoginPage } from './pages/LoginPage';
-import { SignupPage } from './pages/SignupPage';
+import { AuthPage } from './pages/AuthPage';
 import { ChatPage } from './pages/ChatPage';
 import { DocumentsListPage } from './pages/DocumentsListPage';
+import { DocumentsPage } from './pages/DocumentsPage';
 import { DatabaseChatPage } from './pages/DatabaseChatPage';
+import { AccountPage } from './pages/AccountPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { ROUTES } from './utils/constants';
 
@@ -20,8 +21,8 @@ function App() {
           <AuthProvider>
             <Routes>
               <Route path={ROUTES.HOME} element={<HomePage />} />
-              <Route path={ROUTES.LOGIN} element={<LoginPage />} />
-              <Route path={ROUTES.SIGNUP} element={<SignupPage />} />
+              <Route path={ROUTES.LOGIN} element={<AuthPage />} />
+              <Route path={ROUTES.SIGNUP} element={<AuthPage />} />
               <Route
                 path={ROUTES.CHAT}
                 element={
@@ -39,10 +40,26 @@ function App() {
                 }
               />
               <Route
+                path={ROUTES.DOCUMENTS}
+                element={
+                  <ProtectedRoute>
+                    <DocumentsPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path={ROUTES.DATABASE_CHAT}
                 element={
                   <ProtectedRoute>
                     <DatabaseChatPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path={ROUTES.ACCOUNT}
+                element={
+                  <ProtectedRoute>
+                    <AccountPage />
                   </ProtectedRoute>
                 }
               />

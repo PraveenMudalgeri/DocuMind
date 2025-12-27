@@ -9,6 +9,7 @@ import { useToast } from "../../hooks/useToast";
 export function ChatInterface({ session, onSessionUpdate, selectedDocuments = [] }) {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [responseStyle, setResponseStyle] = useState('auto');
   const messagesEndRef = useRef(null);
   const { showToast } = useToast();
 
@@ -16,14 +17,21 @@ export function ChatInterface({ session, onSessionUpdate, selectedDocuments = []
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  // Load messages from session
+  // Load messages from session only when session ID changes
+  const [currentSessionId, setCurrentSessionId] = useState(null);
+
   useEffect(() => {
-    if (session && session.messages) {
-      setMessages(session.messages);
+    if (session) {
+      // Only update messages if session ID actually changed
+      if (session.session_id !== currentSessionId) {
+        setCurrentSessionId(session.session_id);
+        setMessages(session.messages || []);
+      }
     } else {
+      setCurrentSessionId(null);
       setMessages([]);
     }
-  }, [session]);
+  }, [session, currentSessionId]);
 
   useEffect(() => {
     scrollToBottom();
@@ -87,8 +95,8 @@ export function ChatInterface({ session, onSessionUpdate, selectedDocuments = []
     setIsLoading(true);
 
     try {
-      const response = await ragService.query(query, 5, session.session_id, selectedDocuments);
-      
+      const response = await ragService.query(query, 5, session.session_id, selectedDocuments, responseStyle);
+
       console.log("Received response:", response);
 
       // Validate response
@@ -117,16 +125,32 @@ export function ChatInterface({ session, onSessionUpdate, selectedDocuments = []
         response: error.response?.data,
         status: error.response?.status
       });
-      
-      // Remove the user message if there was an error
-      setMessages((prev) => prev.slice(0, -1));
-      
+
+      // Get the actual error message from API or use a default
+      const apiError = error.response?.data?.detail || error.response?.data?.answer || error.message;
+      const isQuotaError = apiError?.toLowerCase().includes('quota');
+      const isTimeoutError = error.code === 'ECONNABORTED' || apiError?.toLowerCase().includes('timeout');
+
+      // Add error message to chat with specific details
+      const errorMessage = {
+        role: "assistant",
+        content: isQuotaError
+          ? "⚠️ **API Quota Exceeded**\n\nThe embedding service has reached its daily limit. Please try again in 24 hours or contact your administrator."
+          : isTimeoutError
+            ? "⏳ **Processing Timeout**\n\nThe request is taking longer than expected. The system may still be processing your query in the background. Please wait a moment and refresh the page to check for updates."
+            : `❌ **Error:** ${apiError || 'Something went wrong. Please try again.'}`,
+        timestamp: new Date().toISOString(),
+        isError: true
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+
       showToast({
         type: "error",
-        message:
-          error.response?.data?.detail ||
-          error.message ||
-          "Failed to get response. Please try again.",
+        message: isQuotaError
+          ? "API quota exceeded. Please wait before trying again."
+          : isTimeoutError
+            ? "Request timed out. Processing may still be ongoing - please refresh to check."
+            : (apiError || "Failed to get response. Please try again."),
       });
     } finally {
       setIsLoading(false);
@@ -136,7 +160,7 @@ export function ChatInterface({ session, onSessionUpdate, selectedDocuments = []
   return (
     <div className="flex flex-col h-full">
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6 pt-16 md:pt-6">
+      <div className="flex-1 overflow-y-auto px-4 md:px-8 py-4 pt-16 md:pt-4">
         {!session ? (
           <div className="flex flex-col items-center justify-center h-full text-center">
             <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mb-4">
@@ -185,7 +209,7 @@ export function ChatInterface({ session, onSessionUpdate, selectedDocuments = []
               Ask questions about your documents and get intelligent,
               context-aware answers.
             </p>
-            
+
             {/* Document selection reminder */}
             {(!selectedDocuments || selectedDocuments.length === 0) && (
               <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg max-w-md">
@@ -204,7 +228,7 @@ export function ChatInterface({ session, onSessionUpdate, selectedDocuments = []
                 </div>
               </div>
             )}
-            
+
             {selectedDocuments && selectedDocuments.length > 0 && (
               <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
                 <p className="text-sm text-green-800">
@@ -214,7 +238,7 @@ export function ChatInterface({ session, onSessionUpdate, selectedDocuments = []
             )}
           </div>
         ) : (
-          <div className="max-w-3xl mx-auto space-y-4">
+          <div className="max-w-7xl mx-auto space-y-6">
             {messages.map((message, index) => {
               // For assistant messages, find the previous user message if query is not present
               let queryForMessage = message.query;
@@ -249,11 +273,13 @@ export function ChatInterface({ session, onSessionUpdate, selectedDocuments = []
 
       {/* Input Area */}
       <div className="border-t border-gray-200 bg-white px-4 md:px-8 py-4">
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           <QueryInput
             onSend={handleSendMessage}
             onExportChat={handleExportChat}
             disabled={isLoading || !session}
+            responseStyle={responseStyle}
+            onResponseStyleChange={setResponseStyle}
           />
         </div>
       </div>

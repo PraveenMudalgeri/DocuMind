@@ -12,6 +12,9 @@ export function DocumentsListPage() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [selectedCount, setSelectedCount] = useState(0);
+
   useEffect(() => {
     loadDocuments();
   }, []);
@@ -37,12 +40,31 @@ export function DocumentsListPage() {
             <h1 className="text-3xl font-semibold text-gray-900 mb-2">My Documents</h1>
             <p className="text-gray-600">View all your indexed documents</p>
           </div>
-          <Button onClick={() => navigate(ROUTES.DOCUMENTS)}>
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            Upload New
-          </Button>
+          <div className="flex items-center gap-3">
+            {documents.length > 0 && (
+              <Button
+                variant={isSelectionMode ? 'secondary' : 'ghost'}
+                onClick={() => {
+                  setIsSelectionMode(!isSelectionMode);
+                }}
+              >
+                {isSelectionMode ? 'Cancel Selection' : (
+                  <>
+                    <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    Delete
+                  </>
+                )}
+              </Button>
+            )}
+            <Button onClick={() => navigate(ROUTES.DOCUMENTS)}>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Upload New
+            </Button>
+          </div>
         </div>
 
         {loading ? (
@@ -65,8 +87,16 @@ export function DocumentsListPage() {
                 </div>
               </div>
             )}
-            
-            <DocumentList documents={documents} />
+
+            <DocumentList
+              documents={documents}
+              onDocumentsChanged={() => {
+                setIsSelectionMode(false);
+                loadDocuments();
+              }}
+              isSelectionMode={isSelectionMode}
+              onSelectionChange={setSelectedCount}
+            />
           </>
         )}
       </Container>

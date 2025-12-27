@@ -6,9 +6,8 @@ export function RightSidebar({ sessionId, onClose }) {
 
   return (
     <div
-      className={`bg-white border-l border-gray-200 flex flex-col h-full shadow-sm transition-all duration-300 ${
-        isExpanded ? "w-80" : "w-16"
-      }`}
+      className={`bg-white border-l border-gray-200 flex flex-col h-full shadow-sm transition-all duration-300 ${isExpanded ? "w-80" : "w-16"
+        }`}
     >
       {/* Header - Notes Toggle */}
       <div
@@ -42,27 +41,18 @@ export function RightSidebar({ sessionId, onClose }) {
           {/* Notes Toggle Button */}
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className={`flex items-center gap-2 hover:bg-white hover:shadow-sm rounded-lg px-3 py-2.5 transition-all w-full border border-transparent hover:border-gray-200 ${
-              !isExpanded ? "justify-center" : ""
-            }`}
+            className={`flex items-center gap-2 hover:bg-white hover:shadow-sm rounded-lg px-3 py-2.5 transition-all w-full border border-transparent hover:border-gray-200 ${!isExpanded ? "justify-center" : ""
+              }`}
             title={isExpanded ? "Collapse notes" : "Expand notes"}
           >
             {isExpanded ? (
               <>
-                <svg
-                  className="w-4 h-4 text-amber-500 flex-shrink-0"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                  />
-                </svg>
-                <span className="text-sm font-medium text-gray-700">Notes</span>
+                <div className="flex items-center gap-2 flex-1">
+                  <svg className="w-5 h-5 text-orange-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                  <span className="text-sm font-medium text-gray-700">Notes</span>
+                </div>
                 <svg
                   className="w-4 h-4 text-gray-400 ml-auto transition-transform"
                   fill="none"
@@ -81,7 +71,7 @@ export function RightSidebar({ sessionId, onClose }) {
               <div className="flex items-center justify-center w-full py-1">
                 {/* Larger SVG for collapsed state */}
                 <svg
-                  className="w-6 h-6 text-amber-500 flex-shrink-0"
+                  className="w-6 h-6 text-orange-500 flex-shrink-0"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"

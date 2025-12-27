@@ -14,7 +14,6 @@ from routes.speech import router as speech_router
 from routes.query_routes import router as query_router
 
 # --- Basic Logging Configuration ---
-# This will help you see the application startup and shutdown messages in the console.
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
@@ -60,7 +59,6 @@ app = FastAPI(
 )
 
 # --- CORS Middleware ---
-# Allows frontend applications to communicate with your API
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # For production, restrict this to your frontend's domain

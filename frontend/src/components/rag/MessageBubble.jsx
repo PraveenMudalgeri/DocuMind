@@ -1,10 +1,12 @@
 import { useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { SourceCard } from "./SourceCard";
 import { VoiceOutputPlayer } from "./VoiceOutputPlayer";
 import { ragService } from "../../services/ragService";
 import { useToast } from "../../hooks/useToast";
 
-// Helper function to remove Markdown formatting
+// Helper function to remove Markdown formatting for TTS
 function stripMarkdown(text) {
   if (!text) return "";
 
@@ -87,9 +89,9 @@ export function MessageBubble({ type, content, sources = [], query = "" }) {
   if (type === "user") {
     return (
       <div className="flex justify-end">
-        <div className="bg-gray-100 rounded-lg px-4 py-2.5 max-w-2xl">
+        <div className="bg-gray-100 rounded-lg px-4 py-2 max-w-3xl shadow-sm">
           <p className="text-gray-900 text-sm leading-relaxed">
-            {cleanContent}
+            {content}
           </p>
         </div>
       </div>
@@ -97,11 +99,14 @@ export function MessageBubble({ type, content, sources = [], query = "" }) {
   }
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="bg-white rounded-lg px-4 py-3 border border-gray-100">
-        <p className="text-gray-900 text-sm leading-relaxed whitespace-pre-wrap">
-          {cleanContent}
-        </p>
+    <div className="flex flex-col gap-2 w-full">
+      <div className="bg-white rounded-xl px-5 py-4 border border-gray-100 shadow-sm w-full">
+        {/* Render markdown content with custom styling */}
+        <div className="prose prose-sm max-w-none prose-headings:text-gray-900 prose-headings:font-semibold prose-p:text-gray-900 prose-p:leading-relaxed prose-strong:text-gray-900 prose-strong:font-semibold prose-code:text-orange-600 prose-code:bg-orange-50 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-pre:bg-gray-50 prose-pre:border prose-pre:border-gray-200 prose-ul:text-gray-900 prose-ol:text-gray-900 prose-li:text-gray-900">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            {content}
+          </ReactMarkdown>
+        </div>
 
         <div className="mt-3 pt-3 border-t border-gray-100">
           {/* Actions */}
@@ -170,9 +175,8 @@ export function MessageBubble({ type, content, sources = [], query = "" }) {
                 </svg>
                 {sources.length} source{sources.length > 1 ? "s" : ""}
                 <svg
-                  className={`w-3 h-3 transition-transform ${
-                    showSources ? "rotate-180" : ""
-                  }`}
+                  className={`w-3 h-3 transition-transform ${showSources ? "rotate-180" : ""
+                    }`}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -232,8 +236,8 @@ export function MessageBubble({ type, content, sources = [], query = "" }) {
             </button>
 
             {/* Voice Output Player - Read aloud */}
-            <VoiceOutputPlayer 
-              text={cleanContent} 
+            <VoiceOutputPlayer
+              text={cleanContent}
               className="ml-1"
             />
           </div>

@@ -1,5 +1,9 @@
 # Modular RAG Implementation Guide
 
+## Abstract
+
+Retrieval-Augmented Generation (RAG) systems have emerged as a critical technique for enhancing Large Language Model (LLM) capabilities by integrating external knowledge sources to mitigate hallucinations and provide up-to-date, contextually relevant responses. However, traditional RAG implementations suffer from rigid, monolithic architectures that limit extensibility and fail to address complex real-world requirements involving heterogeneous data sources, multimodal interactions, and dynamic query processing. This project presents DocuMind, a production-grade Modular RAG framework that decomposes the retrieval-augmentation pipeline into five specialized, independently configurable modules while introducing complementary capabilities for natural language database querying and multimodal interaction. The core RAG pipeline comprises: (1) an Indexing module implementing Small-to-Big chunking strategy for optimized retrieval precision and contextual richness, (2) a Pre-Retrieval module utilizing Hypothetical Document Embeddings (HyDE) for enhanced query-document semantic alignment, (3) a Retrieval module employing FAISS-based vector search with user-specific and document-specific filtering, (4) a Post-Retrieval module featuring Gemini-powered cross-encoder reranking for improved relevance scoring, and (5) a Generation module producing context-grounded, TTS-optimized responses with conversation history awareness. Beyond document-based RAG, the system integrates an AI-powered Text-to-SQL module enabling natural language querying across PostgreSQL, MySQL, and SQLite databases through automated schema extraction and Gemini-based SQL generation with multi-layer security validation. Multimodal capabilities are provided through SarvamAI integration for bidirectional speech-text conversion, supporting voice-based interaction. The architecture implements session-based conversation management, multi-format document processing (PDF, DOCX, HTML, Markdown, TXT), persistent vector storage, and comprehensive authentication via JWT. A React-based frontend with Claude-inspired design provides an intuitive interface featuring dual chat modes (document and database), real-time query processing, export functionality (PDF, CSV, JSON), and responsive design. Experimental deployment demonstrates the framework's ability to deliver accurate, contextually relevant responses across diverse knowledge-intensive applications while maintaining modularity, scalability, and production-readiness for enterprise deployment scenarios.
+
 ## Overview
 
 This document explains the implementation of a **Modular Retrieval-Augmented Generation (RAG)** system built with FastAPI, Google Gemini, and FAISS. The system implements advanced RAG techniques including Small-to-Big chunking, HyDE (Hypothetical Document Embeddings), and model-based reranking.
@@ -91,15 +95,7 @@ Local FAISS-based vector store simulating Pinecone:
 Google Gemini integration with:
 
 - **Embedding Generation**: Creates 768-dimensional vectors
-- **Text Generation**: Produces answers and hypothetical documents
-- **Document Reranking**: Cross-encoder functionality
-- **Rate Limiting**: Handles API quotas and fallbacks
 
-### 4. File Processing Service (`file_processing_service.py`)
-
-Supports multiple file formats:
-- PDF (using pypdf)
-- DOCX (using python-docx)
 - HTML (using BeautifulSoup)
 - Markdown (using markdown)
 - Plain text
@@ -200,7 +196,7 @@ ENVIRONMENT=development
 
 ```python
 # Gemini Models
-GENERATIVE_MODEL = "gemini-2.0-flash"      # For generation/reranking
+GENERATIVE_MODEL = "gemini-2.5-flash"      # For generation/reranking
 EMBEDDING_MODEL = "models/embedding-001"    # For embeddings
 
 # Chunking Parameters

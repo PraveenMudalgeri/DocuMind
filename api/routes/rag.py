@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Query
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Query, Body
 from typing import Dict, Any, List, Optional
 from schema.rag_schema import DocumentPayload, QueryRequest, QueryResponse
 from controller.rag_controller import rag_controller
@@ -9,6 +9,14 @@ router = APIRouter(
     tags=["RAG Service"],
     responses={404: {"description": "Not found"}},
 )
+
+@router.post("/delete-documents", summary="Delete documents and their vectors for the user")
+async def delete_documents(
+    filenames: list = Body(..., embed=True, description="List of filenames to delete"),
+    current_user: dict = Depends(get_current_user)
+):
+    """Delete documents and all related vector data for the user."""
+    return await rag_controller.delete_documents(filenames, current_user)
 
 @router.post(
     "/upload-and-index",

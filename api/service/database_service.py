@@ -151,3 +151,6 @@ class DatabaseService:
             formatted += "\n"
         
         return formatted
+
+# Singleton instance
+database_service = DatabaseService()

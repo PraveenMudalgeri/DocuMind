@@ -1,7 +1,7 @@
 import api from "./api";
 
 export const ragService = {
-  async query(queryText, topK = 5, sessionId = null, selectedDocuments = []) {
+  async query(queryText, topK = 5, sessionId = null, selectedDocuments = [], responseStyle = 'auto') {
     try {
       let url = '/rag/query';
       const params = new URLSearchParams();
@@ -20,13 +20,14 @@ export const ragService = {
       
       console.log('RAG Query:', {
         url,
-        body: { query: queryText, top_k: topK },
+        body: { query: queryText, top_k: topK, response_style: responseStyle },
         params: params.toString()
       });
       
       const response = await api.post(url, {
         query: queryText,
         top_k: topK,
+        response_style: responseStyle,
       });
       
       console.log('RAG Response:', response);

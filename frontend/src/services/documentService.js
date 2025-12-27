@@ -1,10 +1,16 @@
 import api from './api';
 
 export const documentService = {
+  async deleteDocuments(filenames) {
+    // POST to backend to delete documents and vectors
+    const response = await api.post('/rag/delete-documents', { filenames });
+    return response.data;
+  },
+
   async uploadFile(file, onProgress) {
     const formData = new FormData();
     formData.append('file', file);
-    
+
     const response = await api.post('/rag/upload-and-index', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
       onUploadProgress: progressEvent => {
@@ -35,14 +41,14 @@ export const documentService = {
     try {
       const stored = localStorage.getItem('uploaded_documents');
       const documents = stored ? JSON.parse(stored) : [];
-      
+
       // Add new document with timestamp
       documents.push({
         ...documentInfo,
         uploadedAt: new Date().toISOString(),
         id: Date.now().toString()
       });
-      
+
       localStorage.setItem('uploaded_documents', JSON.stringify(documents));
       return documents;
     } catch (error) {

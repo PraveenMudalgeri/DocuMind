@@ -11,7 +11,7 @@ from schema.query_schema import (
     SchemaResponse,
     DisconnectResponse
 )
-from service.database_service import DatabaseService
+from service.database_service import database_service
 from service.sql_generation_service import sql_generation_service
 
 logger = logging.getLogger(__name__)
@@ -24,7 +24,7 @@ class QueryController:
     """
     
     def __init__(self):
-        self.database_service = DatabaseService()
+        self.database_service = database_service
         self._schema_cache: Dict[str, Dict] = {}  # Cache schemas to avoid re-extraction
     
     async def connect_to_database(

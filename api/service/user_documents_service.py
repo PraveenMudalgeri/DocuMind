@@ -13,6 +13,24 @@ class UserDocumentsService:
         self.user_docs_path = "data/user_documents.json"
         self.user_documents: Dict[str, List[Dict[str, Any]]] = {}
         self._load_user_documents()
+
+    def delete_document(self, username: str, filename: str) -> bool:
+        """Delete a document and return True if deleted."""
+        docs = self.user_documents.get(username, [])
+        new_docs = [doc for doc in docs if doc['filename'] != filename]
+        deleted = len(new_docs) < len(docs)
+        self.user_documents[username] = new_docs
+        self._save_user_documents()
+        logger.info(f"Deleted document '{filename}' for user {username}")
+        return deleted
+
+    def delete_documents(self, username: str, filenames: list) -> int:
+        """Delete multiple documents by filename. Returns number deleted."""
+        count = 0
+        for fname in filenames:
+            if self.delete_document(username, fname):
+                count += 1
+        return count
     
     def _load_user_documents(self):
         """Load user documents mapping from disk."""
@@ -36,11 +54,11 @@ class UserDocumentsService:
         except Exception as e:
             logger.error(f"Error saving user documents: {e}")
     
-    def add_document(self, username: str, title: str, filename: str, chunk_ids: List[str]) -> Dict[str, Any]:
+    def add_document(self, username: str, title: str, filename: str, chunk_ids: List[str], description: str = None) -> Dict[str, Any]:
         """Add a document for a specific user."""
         if username not in self.user_documents:
             self.user_documents[username] = []
-        
+
         document = {
             "title": title,
             "filename": filename,
@@ -49,7 +67,9 @@ class UserDocumentsService:
             "uploaded_at": datetime.now().isoformat(),
             "indexed": True
         }
-        
+        if description:
+            document["description"] = description
+
         self.user_documents[username].append(document)
         self._save_user_documents()
         logger.info(f"Added document '{title}' for user {username}")

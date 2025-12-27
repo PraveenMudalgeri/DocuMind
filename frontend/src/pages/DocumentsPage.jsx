@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Header } from '../components/layout/Header';
 import { Container } from '../components/layout/Container';
 import { DocumentUpload } from '../components/documents/DocumentUpload';
-import { Card } from '../components/common/Card';
+import { Button } from '../components/common/Button';
 import { ROUTES } from '../utils/constants';
 
 export function DocumentsPage() {
@@ -23,15 +23,15 @@ export function DocumentsPage() {
             <h1 className="text-3xl font-semibold text-gray-900 mb-2">Upload Documents</h1>
             <p className="text-gray-600">Upload and manage your documents for intelligent querying</p>
           </div>
-          <button
+          <Button
+            variant="secondary"
             onClick={() => navigate(ROUTES.DOCUMENTS_LIST)}
-            className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
             View All Documents
-          </button>
+          </Button>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
