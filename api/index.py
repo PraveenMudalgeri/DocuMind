@@ -3,9 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-# Import your services and routers
-from service.rag.gemini_service import gemini_service
-from service.rag.pinecone_service import pinecone_service
+# --- Import routers and services ---
 from routes.auth import router as auth_router
 from routes.rag import router as rag_router
 from routes.chat import router as chat_router
@@ -14,92 +12,68 @@ from routes.speech import router as speech_router
 from routes.query_routes import router as query_router
 from service.infrastructure.database_service import database_service
 
-# --- Basic Logging Configuration ---
+# --- Logging configuration ---
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
-# --- Lifespan Event Handler ---
-# This async context manager will handle startup and shutdown events.
+# --- Lifespan context manager for startup/shutdown ---
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """
-    Handles application startup and shutdown events.
-    Initializes required services on startup.
+    Handles startup and shutdown events.
+    Only connects to database on startup to avoid serverless cold-start failures.
     """
-    # --- Startup ---
-    logger.info("Application startup: Initializing services...")
-    
-    # Initialize the Google Gemini client
-    try:
-        gemini_initialized = await gemini_service.initialize_gemini()
-        if not gemini_initialized:
-            logger.error("Failed to initialize Gemini service. Continuing without it.")
-    except Exception as e:
-        logger.error(f"Error initializing Gemini: {e}")
+    logger.info("Starting DocuMind API...")
     
     # Connect to MongoDB
     try:
         await database_service.connect()
+        logger.info("Connected to MongoDB.")
     except Exception as e:
         logger.error(f"Failed to connect to MongoDB: {e}. Check DATABASE_URL environment variable.")
 
-    # Initialize Pinecone
-    try:
-        pinecone_initialized = pinecone_service.initialize()
-        if not pinecone_initialized:
-            logger.warning("Pinecone index not initialized. Vector operations may fail.")
-    except Exception as e:
-        logger.error(f"Error initializing Pinecone: {e}. Check PINECONE_API_KEY environment variable.")
+    yield  # Application is running
 
-    logger.info("Services initialization attempt complete.")
-    
-    yield  # --- The application is now running ---
-    
-    # --- Shutdown ---
-    logger.info("Application shutdown: Cleaning up resources...")
-    # Add any cleanup logic here if needed in the future (e.g., closing database connections)
+    # Shutdown
+    logger.info("Shutting down DocuMind API...")
     await database_service.close()
-    logger.info("Cleanup complete.")
+    logger.info("MongoDB connection closed.")
 
-# --- FastAPI App Initialization ---
+# --- FastAPI application ---
 app = FastAPI(
-    title="Modular RAG API",
-    description="A FastAPI backend implementing the Modular RAG framework with JWT authentication, MongoDB, and Pinecone.",
+    title="DocuMind API",
+    description="Modular RAG backend with JWT auth, MongoDB, and Pinecone",
     version="1.0.0",
-    lifespan=lifespan  # Attach the lifespan event handler
+    lifespan=lifespan
 )
 
-# --- CORS Middleware ---
+# --- CORS middleware ---
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # For production, restrict this to your frontend's domain
+    allow_origins=["*"],  # Restrict in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# --- Health Check Endpoint ---
+# --- Health check endpoints ---
 @app.get("/")
 async def root():
-    """Root endpoint for health checks."""
     return {"message": "DocuMind API is running", "status": "healthy"}
 
 @app.get("/health")
 async def health_check():
-    """Health check endpoint for monitoring."""
     return {"status": "healthy", "service": "DocuMind API"}
 
-# --- API Routers ---
-# Include the authentication, RAG, and chat endpoints
+# --- Include API routers ---
 app.include_router(auth_router)
-app.include_router(rag_router) 
-app.include_router(chat_router) 
-app.include_router(export_router) 
-app.include_router(speech_router) 
-app.include_router(query_router) 
+app.include_router(rag_router)
+app.include_router(chat_router)
+app.include_router(export_router)
+app.include_router(speech_router)
+app.include_router(query_router)
 
-# --- Main Entry Point for Development ---
+# --- Main entry point for local development ---
 if __name__ == "__main__":
     import uvicorn
-    # Use reload=True for development to automatically restart the server on code changes
     uvicorn.run("index:app", host="0.0.0.0", port=8000, reload=True)
