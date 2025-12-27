@@ -38,6 +38,3 @@ site/
 # Project specific
 *.bak
 *.backup
-
-#data folder kumar
-data/
