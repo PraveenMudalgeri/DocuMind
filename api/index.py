@@ -11,7 +11,6 @@ from routes.rag import router as rag_router
 from routes.chat import router as chat_router
 from routes.export import router as export_router
 from routes.speech import router as speech_router
-from routes.speech import router as speech_router
 from routes.query_routes import router as query_router
 from service.infrastructure.database_service import database_service
 
@@ -31,18 +30,18 @@ async def lifespan(app: FastAPI):
     logger.info("Application startup: Initializing services...")
     
     # Initialize the Google Gemini client
-    gemini_initialized = await gemini_service.initialize_gemini()
-    if not gemini_initialized:
-        logger.critical("Failed to initialize Gemini service. Application startup aborted.")
-        # In a real-world scenario, you might want the app to fail to start
-        # raise RuntimeError("Could not initialize Gemini Service")
+    try:
+        gemini_initialized = await gemini_service.initialize_gemini()
+        if not gemini_initialized:
+            logger.error("Failed to initialize Gemini service. Continuing without it.")
+    except Exception as e:
+        logger.error(f"Error initializing Gemini: {e}")
     
     # Connect to MongoDB
     try:
         await database_service.connect()
     except Exception as e:
-        logger.critical(f"Failed to connect to MongoDB: {e}")
-        # raise RuntimeError("Could not connect to Database")
+        logger.error(f"Failed to connect to MongoDB: {e}. Check DATABASE_URL environment variable.")
 
     # Initialize Pinecone
     try:
@@ -50,9 +49,9 @@ async def lifespan(app: FastAPI):
         if not pinecone_initialized:
             logger.warning("Pinecone index not initialized. Vector operations may fail.")
     except Exception as e:
-        logger.error(f"Unexpected error initializing Pinecone: {e}")
+        logger.error(f"Error initializing Pinecone: {e}. Check PINECONE_API_KEY environment variable.")
 
-    logger.info("Services initialized successfully.")
+    logger.info("Services initialization attempt complete.")
     
     yield  # --- The application is now running ---
     
@@ -65,7 +64,7 @@ async def lifespan(app: FastAPI):
 # --- FastAPI App Initialization ---
 app = FastAPI(
     title="Modular RAG API",
-    description="A FastAPI backend implementing the Modular RAG framework with JWT authentication and local vector storage.",
+    description="A FastAPI backend implementing the Modular RAG framework with JWT authentication, MongoDB, and Pinecone.",
     version="1.0.0",
     lifespan=lifespan  # Attach the lifespan event handler
 )
@@ -93,23 +92,14 @@ async def health_check():
 # --- API Routers ---
 # Include the authentication, RAG, and chat endpoints
 app.include_router(auth_router)
-app.include_router(rag_router) # The prefix is already defined in the router file
-app.include_router(chat_router) # Chat session management
-app.include_router(export_router) # PDF export functionality
-app.include_router(speech_router) # Speech-to-text and text-to-speech
-app.include_router(query_router) # Text-to-SQL query service
-
-# --- Root and Health Check Endpoints ---
-@app.get("/", tags=["General"])
-async def root():
-    return {"message": "Welcome to the Modular RAG API"}
-
-@app.get("/health", tags=["General"])
-async def health_check():
-    return {"status": "healthy", "message": "API is operational"}
+app.include_router(rag_router) 
+app.include_router(chat_router) 
+app.include_router(export_router) 
+app.include_router(speech_router) 
+app.include_router(query_router) 
 
 # --- Main Entry Point for Development ---
 if __name__ == "__main__":
     import uvicorn
     # Use reload=True for development to automatically restart the server on code changes
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("index:app", host="0.0.0.0", port=8000, reload=True)

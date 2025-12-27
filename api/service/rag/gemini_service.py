@@ -5,24 +5,36 @@ import asyncio
 import asyncio
 from datetime import datetime
 
-import google.generativeai as genai
-from google.generativeai.types import HarmCategory, HarmBlockThreshold
+from google import genai
+from google.genai import types
 
 logger = logging.getLogger(__name__)
 
 # Constants for model names
-GENERATIVE_MODEL_NAME = "gemini-2.5-flash"  # A fast and capable model for generation/reranking
+GENERATIVE_MODEL_NAME = "gemini-2.0-flash"  # A fast and capable model for generation/reranking
 
 class GeminiService:
     def __init__(self):
-        self.generative_model = None
+        self.client = None
         # Safety settings to configure what content is blocked.
-        self.safety_settings = {
-            HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
-            HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
-            HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
-            HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
-        }
+        self.safety_settings = [
+            types.SafetySetting(
+                category=types.HarmCategory.HARM_CATEGORY_HARASSMENT,
+                threshold=types.HarmBlockThreshold.BLOCK_NONE,
+            ),
+            types.SafetySetting(
+                category=types.HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+                threshold=types.HarmBlockThreshold.BLOCK_NONE,
+            ),
+            types.SafetySetting(
+                category=types.HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+                threshold=types.HarmBlockThreshold.BLOCK_NONE,
+            ),
+            types.SafetySetting(
+                category=types.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+                threshold=types.HarmBlockThreshold.BLOCK_NONE,
+            ),
+        ]
 
 
     async def generate_description(self, content: str, title: str = None) -> str:
@@ -81,11 +93,7 @@ class GeminiService:
     async def initialize_gemini(self):
         """Initializes the Google Generative AI client."""
         try:
-            genai.configure(api_key=settings.google_api_key)
-            self.generative_model = genai.GenerativeModel(
-                model_name=GENERATIVE_MODEL_NAME,
-                safety_settings=self.safety_settings
-            )
+            self.client = genai.Client(api_key=settings.google_api_key)
             logger.info("Google Gemini service initialized successfully.")
             return True
         except Exception as e:
@@ -97,12 +105,18 @@ class GeminiService:
     
     async def generate_answer(self, prompt: str) -> str:
         """Generates a text response based on a prompt using an async call."""
-        if not self.generative_model:
+        if not self.client:
             logger.error("Gemini model not initialized.")
             return "Sorry, the generation service is not available."
             
         try:
-            response = await self.generative_model.generate_content_async(prompt)
+            response = await self.client.aio.models.generate_content(
+                model=GENERATIVE_MODEL_NAME,
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    safety_settings=self.safety_settings
+                )
+            )
             return response.text
         except Exception as e:
             logger.error(f"Failed to generate answer: {e}")

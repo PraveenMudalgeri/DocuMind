@@ -87,3 +87,5 @@ dmypy.json
 # Backup files
 *.bak
 *.backup
+
+./documentation
