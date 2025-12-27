@@ -14,7 +14,7 @@ export function useChatSessions() {
     try {
       const data = await chatService.getSessions();
       setSessions(data.sessions || []);
-      
+
       // If no current session and sessions exist, select the first one
       if (!currentSessionId && data.sessions && data.sessions.length > 0) {
         setCurrentSessionId(data.sessions[0].session_id);
@@ -27,7 +27,7 @@ export function useChatSessions() {
   // Load specific session
   const loadSession = async (sessionId) => {
     if (!sessionId) return;
-    
+
     try {
       const session = await chatService.getSession(sessionId);
       setCurrentSession(session);
@@ -60,7 +60,7 @@ export function useChatSessions() {
     try {
       await chatService.deleteSession(sessionId);
       setSessions(prev => prev.filter(s => s.session_id !== sessionId));
-      
+
       // If deleted current session, select another
       if (currentSessionId === sessionId) {
         const remaining = sessions.filter(s => s.session_id !== sessionId);
@@ -71,7 +71,7 @@ export function useChatSessions() {
           setCurrentSession(null);
         }
       }
-      
+
       // Toast removed - deletion is obvious from UI change
     } catch (error) {
       showToast({ type: 'error', message: 'Failed to delete session' });
@@ -83,15 +83,38 @@ export function useChatSessions() {
     setCurrentSessionId(sessionId);
   };
 
-  // Load sessions on mount and create new one if none exist
+  // Load sessions on mount and handle initial state
   useEffect(() => {
     const initializeSessions = async () => {
-      await loadSessions();
-      // Auto-create first session if none exist
-      const stored = localStorage.getItem('has_initial_session');
-      if (!stored) {
-        await createSession('New Chat');
-        localStorage.setItem('has_initial_session', 'true');
+      try {
+        const data = await chatService.getSessions();
+        const sessionsList = data.sessions || [];
+        setSessions(sessionsList);
+
+        // Check if this is the first arrival in this browser session
+        const hasArrived = sessionStorage.getItem('app_arrival_checked');
+
+        if (!hasArrived) {
+          // If the most recent existing session is already empty, reuse it
+          const mostRecentEmpty = sessionsList.length > 0 &&
+            (!sessionsList[0].messages || sessionsList[0].messages.length === 0);
+
+          if (mostRecentEmpty) {
+            setCurrentSessionId(sessionsList[0].session_id);
+          } else {
+            // Otherwise, start with a fresh chat
+            await createSession('New Chat');
+          }
+          sessionStorage.setItem('app_arrival_checked', 'true');
+        } else if (sessionsList.length > 0 && !currentSessionId) {
+          // If already arrived and no current session selected, pick the latest
+          setCurrentSessionId(sessionsList[0].session_id);
+        } else if (sessionsList.length === 0) {
+          // Fallback if no sessions exist at all
+          await createSession('New Chat');
+        }
+      } catch (error) {
+        console.error('Error initializing sessions:', error);
       }
     };
     initializeSessions();

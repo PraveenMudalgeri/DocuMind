@@ -33,7 +33,7 @@ export function Header() {
               <img
                 src="/brand-logo.png"
                 alt="DocuMind Logo"
-                className="absolute min-w-[120px] min-h-[250px] object-contain scale-[1.2]"
+                className="absolute min-w-[120px] min-h-[250px] object-contain scale-[1.2] contrast-[1.1] saturate-110"
               />
             </div>
           </div>
@@ -228,11 +228,11 @@ export function Header() {
       {showMobileMenu && (
         <>
           <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+            className="fixed inset-0 top-16 bg-gray-900/10 backdrop-blur-xs z-40 md:hidden"
             onClick={() => setShowMobileMenu(false)}
           />
-          <div className="absolute top-16 left-0 right-0 bg-white border-b border-gray-200 shadow-lg z-50 md:hidden">
-            <div className="px-6 py-4 space-y-3">
+          <div className="absolute top-16 left-0 right-0 bg-white border-b border-gray-100 shadow-xl z-50 md:hidden animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="px-6 py-4 space-y-2">
               {isAuthenticated ? (
                 <>
                   {/* User Info */}

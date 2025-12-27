@@ -28,7 +28,7 @@ export function DocumentViewer({ document, onClose }) {
     
     if (fileType === 'pdf') {
       // Get the API URL from environment or use default
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://0.0.0.0:8000';
       return (
         <iframe
           src={`${apiUrl}/documents/view/${document.filename}`}

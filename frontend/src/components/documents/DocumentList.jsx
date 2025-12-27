@@ -129,14 +129,14 @@ export function DocumentList({ documents, onDocumentsChanged, isSelectionMode, o
                     />
                   </div>
                 )}
-                <div className={`w-12 h-12 ${isSelected ? 'bg-orange-200' : 'bg-orange-100'} rounded-lg flex items-center justify-center flex-shrink-0 transition-colors`}>
-                  <svg className={`w-6 h-6 ${isSelected ? 'text-orange-700' : 'text-orange-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className={`w-10 h-10 md:w-12 md:h-12 ${isSelected ? 'bg-orange-200' : 'bg-orange-100'} rounded-lg flex items-center justify-center flex-shrink-0 transition-colors`}>
+                  <svg className={`w-5 h-5 md:w-6 md:h-6 ${isSelected ? 'text-orange-700' : 'text-orange-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-1 truncate pr-4">
+                    <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-1 truncate pr-4">
                       {doc.title || 'Untitled Document'}
                     </h3>
                     {!isSelectionMode && (

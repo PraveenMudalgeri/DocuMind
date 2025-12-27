@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from typing import Dict, Any
 from schema.chat_schema import CreateSessionRequest
 from controller.chat_controller import chat_controller
-from service.auth_service import get_current_user
+from service.infrastructure.auth_service import get_current_user
 
 router = APIRouter(
     prefix="/chat",

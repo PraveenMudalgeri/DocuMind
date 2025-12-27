@@ -5,7 +5,7 @@ Handles speech-related business logic for ASR and TTS endpoints.
 
 from fastapi import HTTPException, status, UploadFile
 from typing import Dict, Any
-from service.speech_service import speech_service
+from service.features.speech_service import speech_service
 import logging
 
 logger = logging.getLogger(__name__)

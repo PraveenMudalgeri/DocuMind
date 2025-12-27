@@ -114,8 +114,8 @@ export function DatabaseChatInterface({ activeConnection, onExecuteQuery }) {
 
     return (
         <div className="h-full flex flex-col bg-white">
-            {/* Header */}
-            <div className="bg-white border-b border-gray-200 p-4">
+            {/* Desktop Header - Hidden on mobile */}
+            <div className="hidden md:block bg-white border-b border-gray-200 p-4">
                 <div className="flex items-center justify-between">
                     <div>
                         <h2 className="text-lg font-bold text-gray-900">Database Chat</h2>
@@ -146,7 +146,7 @@ export function DatabaseChatInterface({ activeConnection, onExecuteQuery }) {
             </div>
 
             {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto px-4 md:px-8 py-4 pt-16 md:pt-4">
+            <div className="flex-1 overflow-y-auto px-4 md:px-8 py-4 pt-6 md:pt-4">
                 <div className="max-w-5xl mx-auto space-y-6">
                     {messages.length === 0 ? (
                         <div className="flex flex-col items-center justify-center h-full text-center py-12">
@@ -196,15 +196,15 @@ export function DatabaseChatInterface({ activeConnection, onExecuteQuery }) {
                     <div className="relative bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300">
                         <form onSubmit={handleSubmit}>
                             {/* Textarea Area */}
-                            <div className="px-4 pt-3 pb-1">
+                            <div className="px-4 pt-2 pb-0.5">
                                 <textarea
                                     ref={textareaRef}
                                     value={query}
                                     onChange={(e) => setQuery(e.target.value)}
                                     placeholder="Ask a question about your database..."
                                     disabled={isLoading}
-                                    className="w-full bg-transparent border-none focus:ring-0 focus:outline-none outline-none text-gray-800 placeholder-gray-400 resize-none text-[15px] leading-relaxed py-1 max-h-[200px] overflow-y-auto"
-                                    style={{ minHeight: '40px' }}
+                                    className="w-full bg-transparent border-none focus:ring-0 focus:outline-none outline-none text-gray-800 placeholder-gray-400 resize-none text-[14px] leading-snug py-1 max-h-[100px] overflow-y-auto font-sans"
+                                    style={{ minHeight: '32px' }}
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter' && !e.shiftKey) {
                                             e.preventDefault();
@@ -261,17 +261,17 @@ function MessageBubble({ message }) {
 
     if (message.type === 'user') {
         return (
-            <div className="flex justify-end">
-                <div className="max-w-3xl bg-slate-800 text-white rounded-lg px-4 py-2.5 shadow-sm">
-                    <p className="text-sm">{message.content}</p>
+            <div className="flex justify-end mb-4">
+                <div className="bg-orange-600 rounded-2xl rounded-tr-none px-4 py-2.5 max-w-[85%] sm:max-w-xl shadow-sm">
+                    <p className="text-white text-sm leading-relaxed break-words">{message.content}</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="flex justify-start">
-            <div className="max-w-5xl w-full bg-white border border-gray-100 rounded-xl p-5 shadow-sm space-y-4">
+        <div className="flex flex-col gap-2 mb-6">
+            <div className="bg-white rounded-2xl rounded-tl-none px-5 py-4 border border-gray-100 shadow-sm w-full sm:max-w-[90%] md:max-w-none">
                 {message.success ? (
                     <>
                         {/* SQL Display */}

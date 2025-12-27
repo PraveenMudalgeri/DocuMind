@@ -12,7 +12,7 @@ export function QueryInput({ onSend, disabled, onExportChat, responseStyle = 'au
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 120) + 'px';
+      textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 100) + 'px';
     }
   }, [query]);
 
@@ -107,11 +107,11 @@ export function QueryInput({ onSend, disabled, onExportChat, responseStyle = 'au
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-4">
+    <div className="w-full max-w-5xl mx-auto px-2 sm:px-4">
       <div className="relative bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300">
         <form onSubmit={handleSubmit}>
           {/* Textarea Area */}
-          <div className="px-4 pt-3 pb-1">
+          <div className="px-4 pt-2 pb-0.5">
             <textarea
               ref={textareaRef}
               value={query}
@@ -119,8 +119,8 @@ export function QueryInput({ onSend, disabled, onExportChat, responseStyle = 'au
               onKeyDown={handleKeyDown}
               placeholder="Message DocuMind..."
               disabled={disabled}
-              className="w-full bg-transparent border-none focus:ring-0 focus:outline-none outline-none text-gray-800 placeholder-gray-400 resize-none text-[15px] leading-relaxed py-1 max-h-[200px] overflow-y-auto"
-              style={{ minHeight: '40px' }}
+              className="w-full bg-transparent border-none focus:ring-0 focus:outline-none outline-none text-gray-800 placeholder-gray-400 resize-none text-[14px] leading-snug py-1 max-h-[100px] overflow-y-auto font-sans"
+              style={{ minHeight: '32px' }}
             />
           </div>
 

@@ -1,0 +1,154 @@
+import logging
+from typing import Dict, List, Any, Optional
+from datetime import datetime
+import uuid
+from service.infrastructure.database_service import database_service
+
+logger = logging.getLogger(__name__)
+
+class ChatSessionService:
+    """Service for managing user chat sessions using MongoDB."""
+    
+    def __init__(self):
+        pass
+
+    async def get_collection(self):
+        if database_service.db is None:
+            await database_service.connect()
+        return database_service.db.chat_sessions
+    
+    async def create_session(self, username: str, title: str = "New Chat") -> Dict[str, Any]:
+        """Create a new chat session for a user."""
+        try:
+            collection = await self.get_collection()
+            
+            session_id = str(uuid.uuid4())
+            session = {
+                "session_id": session_id,
+                "username": username,
+                "title": title,
+                "messages": [],
+                "created_at": datetime.now().isoformat(),
+                "updated_at": datetime.now().isoformat()
+            }
+            
+            await collection.insert_one(session)
+            session.pop("_id", None)
+            
+            logger.info(f"Created new session {session_id} for user {username}")
+            return session
+        except Exception as e:
+            logger.error(f"Error creating session: {e}")
+            return {}
+    
+    async def get_user_sessions(self, username: str) -> List[Dict[str, Any]]:
+        """Get all sessions for a specific user."""
+        try:
+            collection = await self.get_collection()
+            cursor = collection.find({"username": username}).sort("updated_at", -1)
+            
+            sessions = []
+            async for sess in cursor:
+                sess.pop("_id", None)
+                sessions.append(sess)
+            return sessions
+        except Exception as e:
+            logger.error(f"Error getting sessions for {username}: {e}")
+            return []
+    
+    async def get_session(self, session_id: str, username: str) -> Optional[Dict[str, Any]]:
+        """Get a specific session if it belongs to the user."""
+        try:
+            collection = await self.get_collection()
+            session = await collection.find_one({"session_id": session_id, "username": username})
+            if session:
+                session.pop("_id", None)
+                return session
+            return None
+        except Exception as e:
+            logger.error(f"Error getting session {session_id}: {e}")
+            return None
+    
+    async def add_message(self, session_id: str, username: str, role: str, content: str, sources: Optional[List[dict]] = None) -> bool:
+        """Add a message to a session."""
+        try:
+            collection = await self.get_collection()
+            
+            # Create message object
+            message = {
+                "role": role,
+                "content": content,
+                "timestamp": datetime.now().isoformat(),
+                "sources": sources
+            }
+            
+            # Update operation
+            update_ops = {
+                "$push": {"messages": message},
+                "$set": {"updated_at": datetime.now().isoformat()}
+            }
+            
+            # Logic to update title on first user message
+            # Ideally we check message count, but atomic update is harder.
+            # Simple heuristic: if role is user (and we assume it's the first message if usage is "New Chat")
+            # We can run a separate update or just fetch-check-update. atomic push is better for consistency.
+            # For simplicity in Phase 3 migration, we'll do the push. Updating title can be separate or ignored for now.
+            
+            result = await collection.update_one(
+                {"session_id": session_id, "username": username},
+                update_ops
+            )
+            
+            return result.modified_count > 0
+        except Exception as e:
+            logger.error(f"Error adding message to {session_id}: {e}")
+            return False
+            
+    async def update_session_title_if_needed(self, session_id: str, username: str, content: str):
+        """Helper to update title if it's currently 'New Chat'."""
+        try:
+            collection = await self.get_collection()
+            session = await collection.find_one({"session_id": session_id, "username": username})
+            
+            if session and session.get("title") == "New Chat":
+                from service.rag.gemini_service import gemini_service
+                await gemini_service.initialize_gemini()
+                new_title = await gemini_service.generate_chat_title(content)
+                
+                await collection.update_one(
+                    {"session_id": session_id},
+                    {"$set": {"title": new_title}}
+                )
+                logger.info(f"Auto-named session {session_id} to '{new_title}'")
+        except Exception as e:
+            logger.error(f"Error updating title: {e}")
+    
+    async def delete_session(self, session_id: str, username: str) -> bool:
+        """Delete a session if it belongs to the user."""
+        try:
+            collection = await self.get_collection()
+            result = await collection.delete_one({"session_id": session_id, "username": username})
+            
+            if result.deleted_count > 0:
+                logger.info(f"Deleted session {session_id} for user {username}")
+                return True
+            return False
+        except Exception as e:
+            logger.error(f"Error deleting session: {e}")
+            return False
+    
+    async def update_session_title(self, session_id: str, username: str, title: str) -> bool:
+        """Update session title."""
+        try:
+            collection = await self.get_collection()
+            result = await collection.update_one(
+                {"session_id": session_id, "username": username},
+                {"$set": {"title": title, "updated_at": datetime.now().isoformat()}}
+            )
+            return result.modified_count > 0
+        except Exception as e:
+            logger.error(f"Error updating session title: {e}")
+            return False
+
+# Singleton instance
+chat_session_service = ChatSessionService()

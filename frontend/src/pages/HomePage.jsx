@@ -21,113 +21,119 @@ export function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#fafbfc] flex flex-col">
+    <div className="min-h-screen bg-white flex flex-col selection:bg-orange-100 selection:text-orange-900 font-sans">
       <Header />
 
+      {/* Background Orbs/Gradients - Even more subtle */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="absolute top-[-15%] left-[-5%] w-[60%] h-[60%] bg-indigo-50/30 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-5%] right-[-2%] w-[50%] h-[50%] bg-amber-50/20 rounded-full blur-[100px]" />
+      </div>
+
       {/* Hero Section */}
-      <main className="flex-1 flex items-center justify-center px-6 py-16 md:py-24">
-        <div className="max-w-4xl mx-auto text-center">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-orange-50 border border-orange-100 rounded-full mb-8 shadow-sm">
-            <span className="w-2 h-2 bg-orange-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(249,115,22,0.5)]"></span>
-            <span className="text-sm text-orange-700 font-semibold tracking-wide">Enterprise AI Assistant</span>
-          </div>
+      <main className="flex-1 flex flex-col items-center px-6 relative z-10">
+        {/* Main Hero Container */}
+        <section className="max-w-6xl mx-auto pt-24 pb-32 w-full">
+          <div className="flex flex-col items-center text-center">
+            {/* Badge - Simplified */}
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-slate-50 border border-slate-100 rounded-full mb-8">
+              <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-pulse" />
+              <span className="text-[11px] font-bold uppercase tracking-[0.15em] text-slate-500">Enterprise AI Workspace</span>
+            </div>
 
-          {/* Heading */}
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-[#1a1c1e] mb-6 leading-[1.1] tracking-tight">
-            Meet <span className="text-orange-500">DocuMind</span>
-            <br />
-            <span className="text-slate-800">Your AI Document Assistant</span>
-          </h1>
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-slate-900 leading-[1.1] tracking-tight mb-8 max-w-4xl">
+              Understand your documents <br />
+              <span className="text-orange-600">with absolute clarity.</span>
+            </h1>
 
-          {/* Subheading */}
-          <p className="text-xl text-slate-600 mb-12 max-w-2xl mx-auto leading-relaxed font-medium">
-            Transform static files into interactive conversations. Upload your documents
-            and get precise, context-aware answers in seconds.
-          </p>
+            <p className="text-lg md:text-xl text-slate-600 mb-12 max-w-2xl leading-relaxed font-medium">
+              Transform PDFs and Databases into interactive conversations.
+              Upload files and get precise, context-aware answers in seconds.
+            </p>
 
-          {/* CTA Form */}
-          <form onSubmit={handleGetStarted} className="max-w-lg mx-auto mb-16 px-4">
-            <div className="flex flex-col sm:flex-row gap-3 p-1.5 bg-white border border-slate-200 rounded-2xl">
-              <input
-                type="email"
-                placeholder="Enter your work email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="flex-1 px-5 py-3.5 bg-transparent border-none focus:ring-0 focus:outline-none text-slate-800 font-medium placeholder-slate-400"
-                required
-              />
+            {/* CTA Form - Improved with separate email input and button */}
+            <form onSubmit={handleGetStarted} className="w-full max-w-lg space-y-4">
+              {/* Email Input */}
+              <div className="p-1.5 bg-white border border-slate-200 rounded-2xl shadow-xl shadow-slate-100 focus-within:border-orange-500 focus-within:ring-4 focus-within:ring-orange-500/5 transition-all">
+                <input
+                  type="email"
+                  placeholder="Enter your work email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full px-6 py-4 bg-transparent border-none focus:ring-0 focus:outline-none text-slate-800 font-semibold placeholder-slate-400 rounded-xl"
+                  required
+                />
+              </div>
+              
+              {/* Start Free Button - Now separate */}
               <button
                 type="submit"
-                className="px-8 py-3.5 bg-orange-500 text-white font-bold rounded-xl hover:bg-orange-600 transition-all active:scale-95"
+                className="w-full px-8 py-4 bg-slate-900 text-white font-bold rounded-2xl hover:bg-slate-800 transition-all active:scale-95 group flex items-center justify-center gap-2 shadow-xl shadow-slate-200"
               >
-                Sign Up Free
+                Start Free
+                <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
               </button>
-            </div>
-            <p className="text-xs text-slate-400 mt-4 font-semibold uppercase tracking-widest">No credit card required • Instant access</p>
-          </form>
+              
+              <div className="mt-6 flex items-center justify-center gap-8 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                <span className="flex items-center gap-2"><svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg> No credit card</span>
+                <span className="flex items-center gap-2"><svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg> Instant Setup</span>
+              </div>
+            </form>
+          </div>
+        </section>
 
-          {/* Features Grid */}
-          <div className="grid md:grid-cols-3 gap-6 md:gap-10 mt-12 pt-12 border-t border-slate-100">
-            <div className="group p-6 bg-white/50 rounded-2xl border border-transparent hover:border-orange-100 hover:bg-white transition-all duration-300">
-              <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center mx-auto mb-4 text-orange-600 group-hover:scale-110 transition-transform">
+        {/* Feature Grid - Re-styled for Simplicity */}
+        <section className="w-full max-w-6xl mx-auto pb-32 pt-16 border-t border-slate-100">
+          <div className="grid md:grid-cols-3 gap-12">
+            <div className="group relative">
+              <div className="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center mb-6 text-indigo-600 transition-all duration-300">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                 </svg>
               </div>
-              <h3 className="text-lg font-bold text-slate-900 mb-2">Smart Ingestion</h3>
-              <p className="text-slate-500 text-sm leading-relaxed">
-                Native support for PDF, DOCX, Markdown, and more.
-              </p>
+              <h3 className="text-xl font-bold text-slate-900 mb-3">Smart Ingestion</h3>
+              <p className="text-slate-500 text-sm leading-relaxed font-medium">Native support for PDF, DOCX, Markdown, and direct database connections.</p>
             </div>
 
-            <div className="group p-6 bg-white/50 rounded-2xl border border-transparent hover:border-orange-100 hover:bg-white transition-all duration-300">
-              <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center mx-auto mb-4 text-orange-600 group-hover:scale-110 transition-transform">
+            <div className="group relative">
+              <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center mb-6 text-orange-600 transition-all duration-300">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
               </div>
-              <h3 className="text-lg font-bold text-slate-900 mb-2">Neural Search</h3>
-              <p className="text-slate-500 text-sm leading-relaxed">
-                Lightning fast RAG architecture for instant chat.
-              </p>
+              <h3 className="text-xl font-bold text-slate-900 mb-3">Neural Search</h3>
+              <p className="text-slate-500 text-sm leading-relaxed font-medium">Lightning-fast RAG architecture for sub-second, context-aware responses.</p>
             </div>
 
-            <div className="group p-6 bg-white/50 rounded-2xl border border-transparent hover:border-orange-100 hover:bg-white transition-all duration-300">
-              <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center mx-auto mb-4 text-orange-600 group-hover:scale-110 transition-transform">
+            <div className="group relative">
+              <div className="w-12 h-12 bg-rose-50 rounded-xl flex items-center justify-center mb-6 text-rose-600 transition-all duration-300">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
               </div>
-              <h3 className="text-lg font-bold text-slate-900 mb-2">Built-in Citations</h3>
-              <p className="text-slate-500 text-sm leading-relaxed">
-                Answers with direct references to your sources.
-              </p>
+              <h3 className="text-xl font-bold text-slate-900 mb-3">Verified Answers</h3>
+              <p className="text-slate-500 text-sm leading-relaxed font-medium">Every response is backed by direct citations and references to your sources.</p>
             </div>
           </div>
-        </div>
+        </section>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-gray-200 bg-gray-50 py-8">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+      {/* Footer - Simplified */}
+      <footer className="border-t border-slate-100 bg-slate-50/50 py-12 relative z-10">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8">
             <div className="flex items-center gap-2">
               <div className="relative w-40 h-8 overflow-hidden flex items-center justify-center">
-                <img src="/brand-logo.png" alt="DocuMind" className="absolute min-w-[120px] min-h-[250px] object-contain scale-[1.2]" />
+                <img src="/brand-logo.png" alt="DocuMind" className="absolute min-w-[120px] min-h-[250px] object-contain scale-[1.2] contrast-[1.1] saturate-110" />
               </div>
-              <span className="text-gray-600">© 2025 DocuMind. All rights reserved.</span>
             </div>
-            <div className="flex items-center gap-6">
-              <a href="#" className="text-gray-600 hover:text-gray-900 transition-colors">
-                Privacy
-              </a>
-              <a href="#" className="text-gray-600 hover:text-gray-900 transition-colors">
-                Terms
-              </a>
-              <a href="#" className="text-gray-600 hover:text-gray-900 transition-colors">
-                Docs
-              </a>
+            <p className="text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em]">© 2025 DocuMind AI • All rights reserved.</p>
+            <div className="flex items-center gap-8">
+              <a href="#" className="text-[10px] font-bold text-slate-400 hover:text-slate-900 transition-colors uppercase tracking-[0.2em]">Privacy</a>
+              <a href="#" className="text-[10px] font-bold text-slate-400 hover:text-slate-900 transition-colors uppercase tracking-[0.2em]">Terms</a>
+              <a href="#" className="text-[10px] font-bold text-slate-400 hover:text-slate-900 transition-colors uppercase tracking-[0.2em]">Docs</a>
             </div>
           </div>
         </div>

@@ -2,10 +2,10 @@ from fastapi import HTTPException, status, UploadFile
 from typing import Dict, Any, Optional, List
 
 from schema.rag_schema import DocumentPayload, QueryRequest, QueryResponse, SourceDocument
-from service.rag_modules_service import rag_modules_service
-from service.file_processing_service import file_processing_service
-from service.user_documents_service import user_documents_service
-from service.chat_session_service import chat_session_service
+from service.rag.rag_service import rag_service
+from service.features.file_processing_service import file_processing_service
+from service.features.user_documents_service import user_documents_service
+from service.features.chat_session_service import chat_session_service
 import logging
 
 logger = logging.getLogger(__name__)
@@ -15,18 +15,50 @@ class RAGController:
     async def delete_documents(self, filenames: list, user: Dict[str, Any]) -> Dict[str, Any]:
         """Delete documents and their vectors for the user."""
         username = user.get('username')
-        # Get all chunk_ids for these documents
-        docs = user_documents_service.get_user_documents(username)
+        
+        # Get all chunk_ids and parent_ids for these documents from user record
+        docs = await user_documents_service.get_user_documents(username)
         chunk_ids = []
+        parent_ids = set()
         for doc in docs:
             if doc['filename'] in filenames:
                 chunk_ids.extend(doc.get('chunk_ids', []))
-        # Delete from user docs
-        deleted_count = user_documents_service.delete_documents(username, filenames)
-        # Delete vectors
-        from service.pinecone_service import pinecone_service
+                # Add parent_ids if they exist in the record (newer documents)
+                if 'parent_ids' in doc:
+                    parent_ids.update(doc.get('parent_ids', []))
+        
+        if not chunk_ids:
+            logger.warning(f"No chunks found for documents: {filenames}")
+            return {"deleted": 0, "vectors_deleted": 0, "parent_chunks_deleted": 0}
+        
+        from service.rag.pinecone_service import pinecone_service
+        from service.rag.parent_chunks_service import parent_chunks_service
+        
+        # Fallback: if parent_ids were not in MongoDB record, try to get them from Pinecone metadata
+        if not parent_ids:
+            logger.info("Parent IDs not found in MongoDB record, fetching from Pinecone...")
+            parent_ids = await pinecone_service.get_parent_ids_from_chunks(chunk_ids)
+        else:
+            parent_ids = list(parent_ids)
+        
+        # Delete from user docs record
+        deleted_count = await user_documents_service.delete_documents(username, filenames)
+        
+        # Delete child vectors from Pinecone
         vectors_deleted = await pinecone_service.delete_vectors_by_chunk_ids(chunk_ids)
-        return {"deleted": deleted_count, "vectors_deleted": vectors_deleted}
+        
+        # Delete parent chunks from MongoDB
+        parent_chunks_deleted = 0
+        if parent_ids:
+            parent_chunks_deleted = await parent_chunks_service.delete_parent_chunks(parent_ids)
+        
+        logger.info(f"Deleted {deleted_count} documents, {vectors_deleted} vectors, {parent_chunks_deleted} parent chunks for user '{username}'")
+        
+        return {
+            "deleted": deleted_count, 
+            "vectors_deleted": vectors_deleted,
+            "parent_chunks_deleted": parent_chunks_deleted
+        }
 
     async def process_and_index_document(
         self, document: DocumentPayload, user: Dict[str, Any], filename: Optional[str] = None
@@ -46,33 +78,26 @@ class RAGController:
             doc_dict['metadata'] = {}
         doc_dict['metadata']['username'] = username
 
-        # Get chunk IDs before indexing (we'll track them)
-        from service.pinecone_service import pinecone_service
-        initial_count = len(pinecone_service.faiss_id_to_vector_id)
+        # Call indexing module which returns chunk IDs and parent IDs
+        result = await rag_service.indexing_module(doc_dict)
+        new_chunk_ids = result.get("chunk_ids", [])
+        new_parent_ids = result.get("parent_ids", [])
 
-        success = await rag_modules_service.indexing_module(doc_dict)
-
-        if not success:
+        if not new_chunk_ids:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Failed to index the document.",
             )
-
-        # Get the new chunk IDs that were added
-        final_count = len(pinecone_service.faiss_id_to_vector_id)
-        # Get the new FAISS IDs added
-        all_ids_sorted = sorted(pinecone_service.faiss_id_to_vector_id.keys())
-        new_faiss_ids = all_ids_sorted[initial_count:final_count]
-        new_chunk_ids = [pinecone_service.faiss_id_to_vector_id[faiss_id] for faiss_id in new_faiss_ids]
-
-        # Track document for this user
+            
+        # Track document for this user in MongoDB
         # Pass description if present in metadata
         description = document.metadata.get('description') if document.metadata else None
-        user_documents_service.add_document(
+        await user_documents_service.add_document(
             username=username,
             title=document.title or 'Untitled',
             filename=filename or document.metadata.get('source_filename', 'Unknown'),
             chunk_ids=new_chunk_ids,
+            parent_ids=new_parent_ids,
             description=description
         )
 
@@ -102,14 +127,14 @@ class RAGController:
             # Get chat history if session_id is provided
             chat_history = []
             if session_id:
-                session = chat_session_service.get_session(session_id, username)
+                session = await chat_session_service.get_session(session_id, username)
                 if session and session.get('messages'):
                     chat_history = session['messages']
                     logger.info(f"Loaded {len(chat_history)} messages from chat history")
             
             # 1. [Pre-Retrieval Module] Enhance the query (e.g., with HyDE)
             try:
-                enhanced_query = await rag_modules_service.pre_retrieval_module(query)
+                enhanced_query = await rag_service.pre_retrieval_module(query)
             except Exception as e:
                 logger.warning(f"Pre-retrieval failed: {e}. Using original query.")
                 enhanced_query = query
@@ -118,16 +143,7 @@ class RAGController:
             # Use retrieval_multiplier to cast a wider net for better quality selection
             retrieval_pool_size = min(top_k * retrieval_multiplier, 50)  # Cap at 50 for performance
             
-            # Check if embedding service has quota issues
-            from service.gemini_service import gemini_service
-            if gemini_service.quota_exceeded:
-                logger.error("Embedding quota exceeded - cannot perform retrieval")
-                return QueryResponse(
-                    answer="⚠️ API quota exceeded. The embedding service has reached its daily limit. Please try again in 24 hours or contact your administrator to increase the quota.",
-                    sources=[]
-                )
-            
-            retrieved_chunks = await rag_modules_service.retrieval_module(
+            retrieved_chunks = await rag_service.retrieval_module(
                 enhanced_query, 
                 top_k=retrieval_pool_size, 
                 username=username, 
@@ -140,7 +156,7 @@ class RAGController:
                 logger.warning(f"No documents retrieved for query: '{query}'")
                 
                 # Check if user has any documents at all
-                user_docs = user_documents_service.get_user_documents(username)
+                user_docs = await user_documents_service.get_user_documents(username)
                 if not user_docs:
                      return QueryResponse(
                         answer="You haven't uploaded any documents yet. Please upload a document to start chatting.",
@@ -154,7 +170,7 @@ class RAGController:
 
             # 3. [Post-Retrieval Module] Rerank with adaptive selection based on quality
             #    Note: Reranking is done on the ORIGINAL query for maximum accuracy.
-            reranked_chunks = await rag_modules_service.post_retrieval_module(
+            reranked_chunks = await rag_service.post_retrieval_module(
                 retrieved_chunks, 
                 query,
                 target_count=top_k,
@@ -173,7 +189,7 @@ class RAGController:
                 )
 
             # 4. [Generation Module] Generate the answer from the refined context with chat history and response style
-            final_answer = await rag_modules_service.generation_module(query, final_context_chunks, chat_history, response_style)
+            final_answer = await rag_service.generation_module(query, final_context_chunks, chat_history, response_style)
             
             # 5. Format the sources for the final response
             sources = []
@@ -189,10 +205,14 @@ class RAGController:
             # Save to chat session if session_id provided
             if session_id:
                 # Add user message
-                chat_session_service.add_message(session_id, username, "user", query)
+                await chat_session_service.add_message(session_id, username, "user", query)
+                
+                # Check if we need to update title (first message heuristic done in service now or helper)
+                await chat_session_service.update_session_title_if_needed(session_id, username, query)
+
                 # Add assistant message with sources
                 sources_dict = [s.model_dump() for s in sources]
-                chat_session_service.add_message(session_id, username, "assistant", final_answer, sources_dict)
+                await chat_session_service.add_message(session_id, username, "assistant", final_answer, sources_dict)
                 
             return QueryResponse(answer=final_answer, sources=sources)
             
@@ -215,7 +235,7 @@ class RAGController:
         extracted_data = await file_processing_service.extract_text_from_file(file)
 
         # 2. Generate a description using Gemini
-        from service.gemini_service import gemini_service
+        from service.rag.gemini_service import gemini_service
         await gemini_service.initialize_gemini()
         description = await gemini_service.generate_description(
             content=extracted_data["content"],
@@ -245,7 +265,7 @@ class RAGController:
         
         try:
             # Get user-specific documents
-            documents = user_documents_service.get_user_documents(username)
+            documents = await user_documents_service.get_user_documents(username)
             
             logger.info(f"Found {len(documents)} documents for user '{username}'")
             

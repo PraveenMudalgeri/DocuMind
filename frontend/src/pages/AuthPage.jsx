@@ -83,21 +83,21 @@ export function AuthPage() {
                 {/* Return to Home Button */}
                 <button
                     onClick={() => navigate(ROUTES.HOME)}
-                    className="mb-4 flex items-center gap-2 text-slate-500 hover:text-orange-600 transition-colors group self-start ml-2"
+                    className="mb-6 flex items-center gap-2.5 px-4 py-2 bg-white/50 backdrop-blur-md border border-slate-200 rounded-full text-slate-500 hover:text-indigo-600 hover:border-indigo-100 hover:bg-white transition-all group self-start shadow-sm"
                 >
                     <svg className="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
-                    <span className="text-sm font-medium">Return to Home</span>
+                    <span className="text-xs font-bold uppercase tracking-wider">Return home</span>
                 </button>
 
-                {/* Logo - Optimized for the vertical image provided */}
+                {/* Logo - Optimized for the vertical image provided with curved border */}
                 <div className="flex flex-col items-center mb-4">
-                    <div className="relative h-20 w-80 overflow-hidden flex items-center justify-center">
+                    <div className="relative h-20 w-80 overflow-hidden flex items-center justify-center bg-gradient-to-br from-orange-50 to-slate-50 rounded-2xl border border-slate-200 shadow-sm">
                         <img
                             src="/brand-logo.png"
                             alt="DocuMind"
-                            className="absolute min-w-[400px] min-h-[400px] object-contain scale-[1]"
+                            className="absolute min-w-[400px] min-h-[400px] object-contain scale-[1] contrast-[1.1] saturate-110"
                         />
                     </div>
                 </div>

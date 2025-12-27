@@ -4,8 +4,8 @@ from typing import Dict, Any
 from pydantic import BaseModel
 from typing import List, Optional
 
-from service.auth_service import get_current_user
-from service.pdf_export_service import pdf_export_service
+from service.infrastructure.auth_service import get_current_user
+from service.features.pdf_export_service import pdf_export_service
 import logging
 
 logger = logging.getLogger(__name__)

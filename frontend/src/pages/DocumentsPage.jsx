@@ -4,6 +4,7 @@ import { Header } from '../components/layout/Header';
 import { Container } from '../components/layout/Container';
 import { DocumentUpload } from '../components/documents/DocumentUpload';
 import { Button } from '../components/common/Button';
+import { Card } from '../components/common/Card';
 import { ROUTES } from '../utils/constants';
 
 export function DocumentsPage() {

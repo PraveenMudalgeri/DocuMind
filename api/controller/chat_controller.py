@@ -1,7 +1,7 @@
 from fastapi import HTTPException, status
 from typing import Dict, Any, List
 from schema.chat_schema import CreateSessionRequest
-from service.chat_session_service import chat_session_service
+from service.features.chat_session_service import chat_session_service
 import logging
 
 logger = logging.getLogger(__name__)
@@ -14,7 +14,7 @@ class ChatController:
         title = request.title or "New Chat"
         
         try:
-            session = chat_session_service.create_session(username, title)
+            session = await chat_session_service.create_session(username, title)
             return session
         except Exception as e:
             logger.error(f"Error creating session for user {username}: {e}")
@@ -28,7 +28,7 @@ class ChatController:
         username = user.get("username")
         
         try:
-            sessions = chat_session_service.get_user_sessions(username)
+            sessions = await chat_session_service.get_user_sessions(username)
             return {
                 "sessions": sessions,
                 "total": len(sessions)
@@ -44,7 +44,7 @@ class ChatController:
         """Get a specific chat session."""
         username = user.get("username")
         
-        session = chat_session_service.get_session(session_id, username)
+        session = await chat_session_service.get_session(session_id, username)
         if not session:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -57,7 +57,7 @@ class ChatController:
         """Delete a chat session."""
         username = user.get("username")
         
-        success = chat_session_service.delete_session(session_id, username)
+        success = await chat_session_service.delete_session(session_id, username)
         if not success:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -70,7 +70,7 @@ class ChatController:
         """Update session title."""
         username = user.get("username")
         
-        success = chat_session_service.update_session_title(session_id, username, title)
+        success = await chat_session_service.update_session_title(session_id, username, title)
         if not success:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,

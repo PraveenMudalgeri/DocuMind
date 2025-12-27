@@ -9,7 +9,8 @@ export function DatabaseConnectionPanel({
     onConnect,
     onDisconnect,
     onSelectConnection,
-    isConnecting
+    isConnecting,
+    onClose // New prop
 }) {
     const [showSchemaViewer, setShowSchemaViewer] = useState(false);
     const [selectedConnectionForSchema, setSelectedConnectionForSchema] = useState(null);
@@ -23,8 +24,23 @@ export function DatabaseConnectionPanel({
         <div className="h-full flex flex-col bg-gray-50 border-r border-gray-200">
             {/* Header */}
             <div className="bg-white border-b border-gray-200 p-4">
-                <h2 className="text-lg font-bold text-gray-900">Database Connections</h2>
-                <p className="text-xs text-gray-500 mt-1">Manage your database connections</p>
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h2 className="text-lg font-bold text-gray-900">Database Connections</h2>
+                        <p className="text-xs text-gray-500 mt-1">Manage your database connections</p>
+                    </div>
+                    {onClose && (
+                        <button
+                            onClick={onClose}
+                            className="md:hidden p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all"
+                            aria-label="Close connections"
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    )}
+                </div>
             </div>
 
             {/* Connection Form */}

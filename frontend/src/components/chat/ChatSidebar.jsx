@@ -3,25 +3,41 @@ import { DocumentUpload } from '../documents/DocumentUpload';
 import { DocumentSelector } from './DocumentSelector';
 import { Button } from '../common/Button';
 
-export function ChatSidebar({ 
-  sessions, 
-  currentSessionId, 
-  onSessionSelect, 
+export function ChatSidebar({
+  sessions,
+  currentSessionId,
+  onSessionSelect,
   onNewSession,
   onDeleteSession,
   onUploadSuccess,
   selectedDocuments = [],
-  onDocumentSelectionChange
+  onDocumentSelectionChange,
+  onClose
 }) {
   const [showUpload, setShowUpload] = useState(false);
 
   return (
-    <div className="w-64 bg-white border-r border-gray-200 flex flex-col h-full shadow-sm">
+    <div className="w-full bg-white border-r border-gray-200 flex flex-col h-full shadow-sm">
+      {/* Mobile Close Button */}
+      {onClose && (
+        <div className="md:hidden flex justify-end p-2 border-b border-gray-100 bg-gray-50/50">
+          <button
+            onClick={onClose}
+            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-white rounded-lg transition-all"
+            aria-label="Close menu"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      )}
+
       {/* Header */}
       <div className="p-4 border-b border-gray-200" style={{ background: 'linear-gradient(to bottom, rgb(249 250 251), white)' }}>
-        <Button 
-          onClick={onNewSession} 
-          className="w-full justify-center shadow-sm hover:shadow-md transition-shadow" 
+        <Button
+          onClick={onNewSession}
+          className="w-full justify-center shadow-sm hover:shadow-md transition-shadow"
           size="sm"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -32,7 +48,7 @@ export function ChatSidebar({
       </div>
 
       {/* Document Selector */}
-      <DocumentSelector 
+      <DocumentSelector
         selectedDocs={selectedDocuments}
         onSelectionChange={onDocumentSelectionChange}
       />
@@ -49,19 +65,19 @@ export function ChatSidebar({
             </svg>
             Upload Document
           </span>
-          <svg 
+          <svg
             className={`w-4 h-4 text-gray-400 transition-transform ${showUpload ? 'rotate-180' : ''}`}
-            fill="none" 
-            stroke="currentColor" 
+            fill="none"
+            stroke="currentColor"
             viewBox="0 0 24 24"
           >
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
         </button>
-        
+
         {showUpload && (
           <div className="mt-3">
-            <DocumentUpload 
+            <DocumentUpload
               onUploadSuccess={() => {
                 onUploadSuccess?.();
                 setShowUpload(false);
@@ -89,32 +105,30 @@ export function ChatSidebar({
             {sessions.map((session) => (
               <div
                 key={session.session_id}
-                className={`group relative rounded-lg cursor-pointer transition-all ${
-                  currentSessionId === session.session_id
-                    ? 'bg-orange-50 border-l-4 border-orange-500'
-                    : 'hover:bg-gray-50 border-l-4 border-transparent'
-                }`}
+                className={`group relative rounded-lg cursor-pointer transition-all ${currentSessionId === session.session_id
+                  ? 'bg-orange-50 border-l-4 border-orange-500'
+                  : 'hover:bg-gray-50 border-l-4 border-transparent'
+                  }`}
                 onClick={() => onSessionSelect(session.session_id)}
               >
                 <div className="px-3 py-2.5 flex items-center justify-between">
                   <div className="flex-1 min-w-0 pr-2">
                     {/* Chat Title */}
-                    <p className={`text-sm truncate font-medium leading-tight ${
-                      currentSessionId === session.session_id
-                        ? 'text-gray-900'
-                        : 'text-gray-700'
-                    }`}>
+                    <p className={`text-sm truncate font-medium leading-tight ${currentSessionId === session.session_id
+                      ? 'text-gray-900'
+                      : 'text-gray-700'
+                      }`}>
                       {session.title}
                     </p>
                   </div>
-                  
+
                   {/* Delete Button */}
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       onDeleteSession(session.session_id);
                     }}
-                    className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-100 text-red-500 rounded transition-all shrink-0"
+                    className="opacity-100 md:opacity-0 md:group-hover:opacity-100 p-1.5 hover:bg-red-100 text-red-400 hover:text-red-500 rounded-lg transition-all shrink-0"
                     title="Delete chat"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

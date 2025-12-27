@@ -2,12 +2,12 @@ from datetime import timedelta
 from fastapi import HTTPException, status
 from schema.user_schema import UserCreate, UserLogin
 from schema.token_schema import Token
-from service.auth_service import (
+from service.infrastructure.auth_service import (
     authenticate_user, 
     create_access_token, 
     get_password_hash
 )
-from lib.utils import create_user, user_exists, save_users_to_file
+from service.infrastructure.user_service import user_service
 from lib.config import settings
 import logging
 
@@ -21,7 +21,8 @@ class AuthController:
         """
         try:
             # Check if user already exists
-            if user_exists(user_data.username):
+            existing_user = await user_service.get_user_by_username(user_data.username)
+            if existing_user:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Username already registered"
@@ -31,14 +32,11 @@ class AuthController:
             hashed_password = get_password_hash(user_data.password)
             
             # Create user
-            user = create_user(
+            user = await user_service.create_user(
                 username=user_data.username,
                 hashed_password=hashed_password,
                 email=user_data.email
             )
-            
-            # Save to file for persistence
-            save_users_to_file()
             
             logger.info(f"User {user_data.username} registered successfully")
             
@@ -62,8 +60,8 @@ class AuthController:
         Handle user login and token generation
         """
         try:
-            # Authenticate user
-            user = authenticate_user(user_credentials.username, user_credentials.password)
+            # Authenticate user (awaiting async function)
+            user = await authenticate_user(user_credentials.username, user_credentials.password)
             
             if not user:
                 raise HTTPException(

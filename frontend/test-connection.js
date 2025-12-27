@@ -1,7 +1,7 @@
 // Simple test script to verify backend connection
 // Run with: node test-connection.js
 
-const API_URL = 'http://127.0.0.1:8000';
+const API_URL = 'http://0.0.0.0:8000';
 
 async function testConnection() {
   console.log('🔍 Testing backend connection...\n');
@@ -36,7 +36,7 @@ async function testConnection() {
     console.log('\n🔧 Troubleshooting:');
     console.log('   1. Make sure backend is running: cd api && python main.py');
     console.log('   2. Check if port 8000 is available');
-    console.log('   3. Verify backend URL is http://127.0.0.1:8000');
+    console.log('   3. Verify backend URL is http://0.0.0.0:8000');
   }
 }
 

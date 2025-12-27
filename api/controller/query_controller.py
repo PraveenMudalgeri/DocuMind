@@ -11,8 +11,8 @@ from schema.query_schema import (
     SchemaResponse,
     DisconnectResponse
 )
-from service.database_service import database_service
-from service.sql_generation_service import sql_generation_service
+from service.features.sql_analysis_service import sql_analysis_service
+from service.features.sql_generation_service import sql_generation_service
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +24,7 @@ class QueryController:
     """
     
     def __init__(self):
-        self.database_service = database_service
+        self.sql_analysis_service = sql_analysis_service
         self._schema_cache: Dict[str, Dict] = {}  # Cache schemas to avoid re-extraction
     
     async def connect_to_database(
@@ -49,7 +49,7 @@ class QueryController:
             
             # Attempt to connect
             logger.info(f"Attempting to connect to database with ID: {connection_id}")
-            success = self.database_service.connect_database(
+            success = self.sql_analysis_service.connect_database(
                 connection_id=connection_id,
                 connection_string=connection_request.connection_string
             )
@@ -61,7 +61,7 @@ class QueryController:
                 )
             
             # Extract schema and cache it
-            schema = self.database_service.get_logical_schema(connection_id)
+            schema = self.sql_analysis_service.get_logical_schema(connection_id)
             self._schema_cache[connection_id] = schema
             
             database_type = schema.get("database_type", "unknown")
@@ -117,14 +117,14 @@ class QueryController:
             
             if connection_id not in self._schema_cache:
                 logger.info("Schema not cached, extracting from database")
-                schema = self.database_service.get_logical_schema(connection_id)
+                schema = self.sql_analysis_service.get_logical_schema(connection_id)
                 self._schema_cache[connection_id] = schema
             else:
                 schema = self._schema_cache[connection_id]
                 logger.info("Using cached schema")
             
             # Step 2: Format schema for LLM
-            formatted_schema = self.database_service.format_schema_for_llm(schema)
+            formatted_schema = self.sql_analysis_service.format_schema_for_llm(schema)
             
             # Step 3: Generate SQL using Gemini
             logger.info(f"Generating SQL for: {nl_query}")
@@ -135,7 +135,7 @@ class QueryController:
             
             # Step 4: Execute query (validation happens inside execute_query)
             logger.info(f"Executing SQL: {generated_sql}")
-            results = self.database_service.execute_query(
+            results = self.sql_analysis_service.execute_query(
                 connection_id=connection_id,
                 sql_query=generated_sql
             )
@@ -185,13 +185,13 @@ class QueryController:
         try:
             # Get schema (from cache or extract)
             if connection_id not in self._schema_cache:
-                schema = self.database_service.get_logical_schema(connection_id)
+                schema = self.sql_analysis_service.get_logical_schema(connection_id)
                 self._schema_cache[connection_id] = schema
             else:
                 schema = self._schema_cache[connection_id]
             
             # Format for human readability
-            formatted_schema = self.database_service.format_schema_for_llm(schema)
+            formatted_schema = self.sql_analysis_service.format_schema_for_llm(schema)
             
             return SchemaResponse(
                 success=True,
@@ -229,7 +229,7 @@ class QueryController:
                 del self._schema_cache[connection_id]
             
             # Disconnect
-            success = self.database_service.disconnect_database(connection_id)
+            success = self.sql_analysis_service.disconnect_database(connection_id)
             
             if success:
                 logger.info(f"Successfully disconnected: {connection_id}")

@@ -45,22 +45,22 @@ export function QueryResultsTable({ results, rowCount }) {
     return (
         <div className="space-y-3">
             {/* Header with row count and export buttons */}
-            <div className="flex items-center justify-between">
-                <div className="text-sm text-gray-600">
-                    <span className="font-semibold">{rowCount}</span> row{rowCount !== 1 ? 's' : ''} returned
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="text-xs md:text-sm text-gray-600">
+                    <span className="font-bold text-gray-900">{rowCount}</span> row{rowCount !== 1 ? 's' : ''} returned
                 </div>
                 <div className="flex gap-2">
                     <button
                         onClick={exportToCSV}
-                        className="px-3 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors"
+                        className="px-3 py-1.5 text-[10px] md:text-xs font-bold text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-all uppercase tracking-tighter"
                     >
-                        Export CSV
+                        CSV
                     </button>
                     <button
                         onClick={exportToJSON}
-                        className="px-3 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors"
+                        className="px-3 py-1.5 text-[10px] md:text-xs font-bold text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-all uppercase tracking-tighter"
                     >
-                        Export JSON
+                        JSON
                     </button>
                 </div>
             </div>

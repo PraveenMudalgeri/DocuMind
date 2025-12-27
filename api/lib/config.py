@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     sarvam_api_key: Optional[str] = os.getenv("SARVAM_API_KEY")
     
     # Embedding Configuration
-    embedding_dim: int = int(os.getenv("EMBEDDING_DIM", "768"))  # For embedding-001 model
+    embedding_dim: int = int(os.getenv("EMBEDDING_DIM", "768"))  # For FastEmbed (BGE Base)
     
     # Database (for future use if needed)
     database_url: Optional[str] = os.getenv("DATABASE_URL")

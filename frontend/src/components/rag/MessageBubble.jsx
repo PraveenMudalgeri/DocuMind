@@ -88,9 +88,9 @@ export function MessageBubble({ type, content, sources = [], query = "" }) {
 
   if (type === "user") {
     return (
-      <div className="flex justify-end">
-        <div className="bg-gray-100 rounded-lg px-4 py-2 max-w-3xl shadow-sm">
-          <p className="text-gray-900 text-sm leading-relaxed">
+      <div className="flex justify-end mb-4">
+        <div className="bg-orange-500 rounded-2xl rounded-tr-none px-4 py-2.5 max-w-[85%] sm:max-w-xl shadow-sm">
+          <p className="text-white text-sm leading-relaxed break-words">
             {content}
           </p>
         </div>
@@ -99,10 +99,10 @@ export function MessageBubble({ type, content, sources = [], query = "" }) {
   }
 
   return (
-    <div className="flex flex-col gap-2 w-full">
-      <div className="bg-white rounded-xl px-5 py-4 border border-gray-100 shadow-sm w-full">
+    <div className="flex flex-col gap-2 mb-6">
+      <div className="bg-white rounded-2xl rounded-tl-none px-5 py-4 border border-gray-100 shadow-sm w-full sm:max-w-[90%] md:max-w-none">
         {/* Render markdown content with custom styling */}
-        <div className="prose prose-sm max-w-none prose-headings:text-gray-900 prose-headings:font-semibold prose-p:text-gray-900 prose-p:leading-relaxed prose-strong:text-gray-900 prose-strong:font-semibold prose-code:text-orange-600 prose-code:bg-orange-50 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-pre:bg-gray-50 prose-pre:border prose-pre:border-gray-200 prose-ul:text-gray-900 prose-ol:text-gray-900 prose-li:text-gray-900">
+        <div className="prose max-w-none prose-headings:text-gray-900 prose-headings:font-semibold prose-p:text-gray-900 prose-p:leading-relaxed prose-strong:text-gray-900 prose-strong:font-semibold prose-code:text-orange-600 prose-code:bg-orange-50 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-pre:bg-gray-50 prose-pre:border prose-pre:border-gray-200 prose-ul:text-gray-900 prose-ol:text-gray-900 prose-li:text-gray-900">
           <ReactMarkdown remarkPlugins={[remarkGfm]}>
             {content}
           </ReactMarkdown>
@@ -245,7 +245,7 @@ export function MessageBubble({ type, content, sources = [], query = "" }) {
       </div>
 
       {showSources && sources && sources.length > 0 && (
-        <div className="space-y-2 ml-4">
+        <div className="space-y-2 pl-4 sm:pl-6 border-l-2 border-orange-100 mt-2 mb-4">
           {sources.map((source, index) => (
             <SourceCard key={source.id || index} {...source} />
           ))}

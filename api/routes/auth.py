@@ -3,7 +3,7 @@ from typing import Dict, Any
 from schema.user_schema import UserCreate, UserLogin
 from schema.token_schema import Token
 from controller.auth_controller import auth_controller
-from service.auth_service import get_current_user
+from service.infrastructure.auth_service import get_current_user
 
 router = APIRouter()
 
