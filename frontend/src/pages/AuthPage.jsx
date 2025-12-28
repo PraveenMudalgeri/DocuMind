@@ -28,17 +28,37 @@ export function AuthPage() {
         }
     }, [isAuthenticated, isLoading, navigate]);
 
+    const formatErrorMessage = (error, defaultMsg) => {
+        try {
+            console.log('Auth Error:', error);
+            const detail = error.response?.data?.detail;
+            if (typeof detail === 'string') return detail;
+            if (Array.isArray(detail)) {
+                return detail.map(d => d.msg).join(', ');
+            }
+            if (detail && typeof detail === 'object') {
+                return Object.values(detail).join(', ');
+            }
+            return defaultMsg;
+        } catch (e) {
+            console.error('Error formatting message:', e);
+            return defaultMsg;
+        }
+    };
+
     const handleLogin = async (e) => {
         e.preventDefault();
         setLoading(true);
+        console.log('Attempting login to:', import.meta.env.VITE_API_URL || 'https://documind-p046.onrender.com');
 
         try {
             await login(username, password);
             navigate(ROUTES.CHAT);
         } catch (error) {
+            console.error('Login error:', error);
             showToast({
                 type: 'error',
-                message: error.response?.data?.detail || 'Login failed. Please check your credentials.'
+                message: formatErrorMessage(error, 'Login failed. Please check your credentials.')
             });
         } finally {
             setLoading(false);
@@ -67,9 +87,10 @@ export function AuthPage() {
             setPassword('');
             setConfirmPassword('');
         } catch (error) {
+            console.error('Signup error:', error);
             showToast({
                 type: 'error',
-                message: error.response?.data?.detail || 'Signup failed. Please try again.'
+                message: formatErrorMessage(error, 'Signup failed. Please try again.')
             });
         } finally {
             setLoading(false);

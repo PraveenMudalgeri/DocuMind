@@ -55,6 +55,8 @@ log_info "Installing frontend dependencies..."
 bun install
 
 log_info "Starting frontend dev server..."
+# Explicitly set API URL to local backend to override defaults/prod
+export VITE_API_URL="http://127.0.0.1:8000"
 bun run dev &
 FRONTEND_PID=$!
 
@@ -84,7 +86,8 @@ log_info "Installing backend dependencies..."
 uv sync
 
 log_info "Starting backend server..."
-uv run uvicorn main:app --host 0.0.0.0 --port 8000 --reload &
+# Use 127.0.0.1 for better local compatibility on macOS
+uv run uvicorn main:app --host 127.0.0.1 --port 8000 --reload &
 BACKEND_PID=$!
 
 cd ..

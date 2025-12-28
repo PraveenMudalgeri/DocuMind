@@ -11,7 +11,7 @@ from google.genai import types
 logger = logging.getLogger(__name__)
 
 # Constants for model names
-GENERATIVE_MODEL_NAME = "gemini-2.0-flash-exp"  # A fast and capable model for generation/reranking
+GENERATIVE_MODEL_NAME = "gemini-1.5-flash"  # A fast and capable model for generation/reranking
 
 class GeminiService:
     def __init__(self):
@@ -104,23 +104,42 @@ class GeminiService:
 
     
     async def generate_answer(self, prompt: str) -> str:
-        """Generates a text response based on a prompt using an async call."""
+        """Generates a text response based on a prompt using an async call with retry logic."""
         if not self.client:
             logger.error("Gemini model not initialized.")
             return "Sorry, the generation service is not available."
             
-        try:
-            response = await self.client.aio.models.generate_content(
-                model=GENERATIVE_MODEL_NAME,
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    safety_settings=self.safety_settings
+        max_retries = 3
+        base_delay = 2
+        
+        for attempt in range(max_retries):
+            try:
+                response = await self.client.aio.models.generate_content(
+                    model=GENERATIVE_MODEL_NAME,
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        safety_settings=self.safety_settings
+                    )
                 )
-            )
-            return response.text
-        except Exception as e:
-            logger.error(f"Failed to generate answer: {e}")
-            return "Sorry, I couldn't generate an answer at this time."
+                return response.text
+            except Exception as e:
+                error_msg = str(e)
+                if "429" in error_msg or "RESOURCE_EXHAUSTED" in error_msg:
+                    if attempt < max_retries - 1:
+                        wait_time = base_delay * (2 ** attempt)
+                        logger.warning(f"Rate limit hit in generate_answer. Waiting {wait_time}s before retry {attempt + 1}/{max_retries}...")
+                        await asyncio.sleep(wait_time)
+                        continue
+                elif "503" in error_msg or "Service Unavailable" in error_msg:
+                     if attempt < max_retries - 1:
+                        wait_time = base_delay * (2 ** attempt)
+                        logger.warning(f"Service unavailable in generate_answer. Waiting {wait_time}s before retry {attempt + 1}/{max_retries}...")
+                        await asyncio.sleep(wait_time)
+                        continue
+                        
+                logger.error(f"Failed to generate answer (Attempt {attempt + 1}/{max_retries}): {e}")
+                if attempt == max_retries - 1:
+                    return "Sorry, I couldn't generate an answer at this time due to high traffic or connection issues."
 
     async def rerank_documents(self, query: str, documents: List[Dict[str, Any]], top_n: int = 5) -> List[Dict[str, Any]]:
         """

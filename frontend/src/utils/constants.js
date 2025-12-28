@@ -1,4 +1,4 @@
-export const API_URL = import.meta.env.VITE_API_URL || 'http://10.0.8.44:8000';
+export const API_URL = import.meta.env.VITE_API_URL || 'https://documind-p046.onrender.com';
 export const APP_NAME = import.meta.env.VITE_APP_NAME || 'DocuMind';
 export const MAX_FILE_SIZE = parseInt(import.meta.env.VITE_MAX_FILE_SIZE) || 10485760; // 10MB
 export const ALLOWED_FILE_TYPES = ['.pdf', '.docx', '.html', '.md', '.txt'];

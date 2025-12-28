@@ -1,190 +1,44 @@
-# DocuMind AI - Document Intelligence Platform
+# DocuMind - Intelligent Document Chat
 
-A modern AI-powered document analysis and chat platform built with React, FastAPI, and advanced RAG (Retrieval-Augmented Generation) technology.
+DocuMind is an advanced RAG (Retrieval-Augmented Generation) application that allows users to seamlessly interact with their documents using AI. By leveraging the power of Google's Gemini models and vector search, DocuMind provides accurate, context-aware answers from your uploaded files.
 
-## Features
+## Live Demo
 
-- 🤖 **AI-Powered Chat**: Intelligent conversations with your documents
-- 📄 **Multi-Format Support**: PDF, DOCX, Markdown, HTML, and TXT files
-- 🔍 **Smart Search**: Advanced vector-based document retrieval
-- 🗣️ **Text-to-Speech**: Convert responses to natural speech
-- 📱 **Responsive Design**: Works seamlessly on desktop and mobile
-- 🔐 **Secure Authentication**: User accounts and session management
-- 💾 **Database Integration**: Direct database querying capabilities
+- **Frontend Application:** [https://documind-mrag.vercel.app](https://documind-mrag.vercel.app)
+- **Backend API:** [https://documind-p046.onrender.com](https://documind-p046.onrender.com)
 
-## Quick Start
+## Modular RAG Architecture
 
-### Local Development
+DocuMind is built upon a highly scalable Modular RAG framework, ensuring precise context retrieval and coherent responses. The system comprises **6 Main Components**:
 
-1. **Clone the repository**
-   ```bash
-   git clone <your-repo-url>
-   cd documind
-   ```
+1.  **Orchestrator (RAG Service):** Coordinations the entire workflow, managing the flow of data between user input, retrieval, and generation.
+2.  **Document Ingestion Engine:** Handles the parsing, cleaning, and segmentation of various file formats (PDF, DOCX, TXT).
+3.  **Embedding Service:** Transforms text chunks into high-dimensional vector embeddings for semantic understanding.
+4.  **Vector Store (Pinecone):** Manages high-performance similarity search and retrieval of context.
+5.  **Parent-Child Indexing Service:** Implements advanced indexing strategies (see below) to maximize retrieval quality.
+6.  **Generation Service (Gemini):** leverages Google's state-of-the-art LLMs to synthesize answers using the retrieved context.
 
-2. **Set up the backend**
-   ```bash
-   cd api
-   pip install -r requirements.txt
-   cp .env.example .env
-   # Update .env with your API keys
-   uvicorn main:app --reload
-   ```
+### Vector Storing Methods: Parent & Child Indexing
 
-3. **Set up the frontend**
-   ```bash
-   cd frontend
-   npm install
-   cp .env.example .env
-   # Update .env with your API URL
-   npm run dev
-   ```
+To overcome the limitations of standard chunking (where context can be lost), DocuMind employs a **Parent-Child Indexing** strategy:
 
-4. **Access the application**
-   - Frontend: http://localhost:5173
-   - Backend API: http://0.0.0.0:8000
-
-### Vercel Deployment
-
-1. **Prepare for deployment**
-   ```bash
-   ./deploy.sh
-   ```
-
-2. **Deploy to Vercel**
-   ```bash
-   npm i -g vercel
-   vercel
-   ```
-
-3. **Configure environment variables** in Vercel dashboard
-
-See [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) for detailed deployment instructions.
-
-## Environment Variables
-
-### Backend (.env)
-```bash
-MONGODB_URL=your_mongodb_connection_string
-GEMINI_API_KEY=your_gemini_api_key
-PINECONE_API_KEY=your_pinecone_api_key
-SARVAM_API_KEY=your_sarvam_api_key
-SECRET_KEY=your_secret_key
-```
-
-### Frontend (.env)
-```bash
-VITE_API_URL=http://0.0.0.0:8000
-```
-
-## Technology Stack
-
-### Frontend
-- **React 19** - Modern UI framework
-- **Vite** - Fast build tool
-- **Tailwind CSS** - Utility-first styling
-- **React Router** - Client-side routing
-- **Axios** - HTTP client
-
-### Backend
-- **FastAPI** - Modern Python web framework
-- **MongoDB** - Document database
-- **Pinecone** - Vector database
-- **Google Gemini** - AI language model
-- **FastEmbed** - Text embeddings
-- **Sarvam AI** - Text-to-speech
-
-## Project Structure
-
-```
-documind/
-├── frontend/                 # React frontend
-│   ├── src/
-│   │   ├── components/      # Reusable UI components
-│   │   ├── pages/          # Page components
-│   │   ├── services/       # API services
-│   │   └── hooks/          # Custom React hooks
-│   ├── public/             # Static assets
-│   └── dist/               # Build output
-├── api/                     # FastAPI backend
-│   ├── controller/         # Request handlers
-│   ├── service/            # Business logic
-│   ├── routes/             # API routes
-│   ├── schema/             # Data models
-│   └── lib/                # Utilities
-├── documentation/          # Project documentation
-└── vercel.json            # Deployment configuration
-```
+- **Child Chunks:** Small, dense text segments responsible for high-accuracy semantic search and matching.
+- **Parent Documents:** Larger context blocks linked to the child chunks.
+- **Retrieval Logic:** When a child chunk matches a user's query, the system retrieves its corresponding **Parent Document**. This ensures the LLM receives full, coherent context rather than fragmented snippets, significantly improving answer quality.
 
 ## Key Features
 
-### Document Processing
-- Intelligent chunking with parent-child relationships
-- Vector embeddings for semantic search
-- Multi-format document parsing
-- Automatic indexing and retrieval
+- **Chat with Documents:** Upload PDFs, DOCX, or text files and ask questions in natural language.
+- **Advanced RAG Engine:** Uses Gemini AI + Pinecone/Vector DB for high-precision context retrieval.
+- **Secure Authentication:** Robust user management with unique user IDs and secure session handling.
+- **Smart History:** Persistent chat sessions allowing you to revisit previous conversations.
+- **Database Chat:** Special capability to query structured data using natural language (Text-to-SQL).
+- **Responsive UI:** A modern, mobile-friendly interface built with React and Tailwind CSS.
 
-### Chat Interface
-- Real-time messaging
-- Context-aware responses
-- Source citations
-- Chat history management
-- Simple, predictable chat naming
+## Technology Stack
 
-### User Experience
-- Clean, modern interface
-- Mobile-responsive design
-- Dark/light mode support
-- Intuitive navigation
-- Fast, responsive interactions
-
-## API Endpoints
-
-### Authentication
-- `POST /auth/register` - User registration
-- `POST /auth/login` - User login
-- `GET /auth/me` - Get current user
-
-### Documents
-- `POST /documents/upload` - Upload document
-- `GET /documents` - List user documents
-- `DELETE /documents/{id}` - Delete document
-
-### Chat
-- `POST /chat/sessions` - Create chat session
-- `GET /chat/sessions` - List chat sessions
-- `POST /chat/query` - Send chat message
-- `DELETE /chat/sessions/{id}` - Delete chat session
-
-### Database
-- `POST /database/connect` - Connect to database
-- `POST /database/query` - Query database
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
-
-## License
-
-This project is licensed under the MIT License.
-
-## Support
-
-For support and questions:
-- Check the [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)
-- Review the documentation in the `/documentation` folder
-- Open an issue on GitHub
-
-## Changelog
-
-### Recent Updates
-- ✅ Simplified chat naming for better performance
-- ✅ Optimized for Vercel deployment
-- ✅ Improved mobile experience
-- ✅ Enhanced logo visibility
-- ✅ Fixed document upload issues
-- ✅ Async chunking optimization
+- **Frontend:** React, Vite, Tailwind CSS
+- **Backend:** Python, FastAPI
+- **AI/LLM:** Google Gemini
+- **Database:** MongoDB Atlas (Cloud)
+- **Deployment:** Vercel (Frontend), Render (Backend)
