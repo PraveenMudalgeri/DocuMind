@@ -44,8 +44,16 @@ class RAGController:
         # Delete from user docs record
         deleted_count = await user_documents_service.delete_documents(username, filenames)
         
-        # Delete child vectors from Pinecone
+        # Delete child vectors from Pinecone using known chunk_ids
         vectors_deleted = await pinecone_service.delete_vectors_by_chunk_ids(chunk_ids)
+        
+        # Robust sweep: also delete by source_filename and username filter
+        # This ensures cleanup even if chunk_ids list was incomplete
+        for filename in filenames:
+            await pinecone_service.delete_vectors_by_filter({
+                "username": username,
+                "source_filename": filename
+            })
         
         # Delete parent chunks from MongoDB
         parent_chunks_deleted = 0

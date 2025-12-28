@@ -11,6 +11,8 @@ from routes.export import router as export_router
 from routes.speech import router as speech_router
 from routes.query_routes import router as query_router
 from service.infrastructure.database_service import database_service
+from service.rag.pinecone_service import pinecone_service
+from service.rag.gemini_service import gemini_service
 
 # --- Logging configuration ---
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -31,6 +33,24 @@ async def lifespan(app: FastAPI):
         logger.info("Connected to MongoDB.")
     except Exception as e:
         logger.error(f"Failed to connect to MongoDB: {e}. Check DATABASE_URL environment variable.")
+
+    # Initialize Pinecone
+    try:
+        if pinecone_service.initialize():
+            logger.info("Initialized Pinecone connection.")
+        else:
+            logger.warning("Pinecone initialization returned false. Check configuration.")
+    except Exception as e:
+        logger.error(f"Failed to initialize Pinecone: {e}")
+
+    # Initialize Gemini
+    try:
+        if await gemini_service.initialize_gemini():
+            logger.info("Initialized Gemini service.")
+        else:
+            logger.warning("Gemini initialization returned false.")
+    except Exception as e:
+        logger.error(f"Failed to initialize Gemini: {e}")
 
     yield  # Application is running
 

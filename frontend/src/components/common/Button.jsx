@@ -1,21 +1,21 @@
-export function Button({ 
-  children, 
-  variant = 'primary', 
-  size = 'md', 
-  loading = false, 
+export function Button({
+  children,
+  variant = 'primary',
+  size = 'md',
+  loading = false,
   disabled = false,
   type = 'button',
   onClick,
   className = ''
 }) {
-  const baseStyles = 'font-medium rounded-lg transition-all duration-200 flex items-center justify-center gap-2';
-  
+  const baseStyles = 'font-medium rounded-lg transition-all duration-200 flex items-center justify-center gap-2 active:scale-95';
+
   const variants = {
-    primary: 'bg-orange-500 text-white hover:bg-orange-600 shadow-sm',
-    secondary: 'bg-transparent text-gray-700 border border-gray-300 hover:bg-gray-50',
-    ghost: 'bg-transparent text-gray-600 hover:bg-gray-100',
+    primary: 'bg-orange-500 text-white hover:bg-orange-600 hover:shadow-md active:bg-orange-700 shadow-sm',
+    secondary: 'bg-transparent text-gray-700 border border-gray-300 hover:bg-gray-50 active:bg-gray-100',
+    ghost: 'bg-transparent text-gray-600 hover:bg-gray-100 active:bg-gray-200',
   };
-  
+
   const sizes = {
     sm: 'px-3 py-2 text-sm',
     md: 'px-6 py-3 text-base',
@@ -27,7 +27,7 @@ export function Button({
       type={type}
       onClick={onClick}
       disabled={disabled || loading}
-      className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${disabled || loading ? 'opacity-50 cursor-not-allowed' : ''} ${className}`}
+      className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${disabled || loading ? 'opacity-50 cursor-not-allowed scale-100 active:scale-100' : ''} ${className}`}
     >
       {loading && (
         <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">

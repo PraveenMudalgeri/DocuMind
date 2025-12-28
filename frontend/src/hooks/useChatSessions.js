@@ -91,27 +91,19 @@ export function useChatSessions() {
         const sessionsList = data.sessions || [];
         setSessions(sessionsList);
 
-        // Check if this is the first arrival in this browser session
-        const hasArrived = sessionStorage.getItem('app_arrival_checked');
+        // Always check if the most recent session is empty and reuse it
+        const mostRecentEmpty = sessionsList.length > 0 &&
+          (!sessionsList[0].messages || sessionsList[0].messages.length === 0);
 
-        if (!hasArrived) {
-          // If the most recent existing session is already empty, reuse it
-          const mostRecentEmpty = sessionsList.length > 0 &&
-            (!sessionsList[0].messages || sessionsList[0].messages.length === 0);
-
-          if (mostRecentEmpty) {
-            setCurrentSessionId(sessionsList[0].session_id);
-          } else {
-            // Otherwise, start with a fresh chat
-            await createSession('New Chat');
-          }
-          sessionStorage.setItem('app_arrival_checked', 'true');
-        } else if (sessionsList.length > 0 && !currentSessionId) {
-          // If already arrived and no current session selected, pick the latest
+        if (mostRecentEmpty) {
+          // Reuse the existing empty chat
           setCurrentSessionId(sessionsList[0].session_id);
         } else if (sessionsList.length === 0) {
-          // Fallback if no sessions exist at all
+          // Only create a new chat if no sessions exist at all
           await createSession('New Chat');
+        } else if (!currentSessionId) {
+          // If sessions exist but none selected, pick the latest
+          setCurrentSessionId(sessionsList[0].session_id);
         }
       } catch (error) {
         console.error('Error initializing sessions:', error);

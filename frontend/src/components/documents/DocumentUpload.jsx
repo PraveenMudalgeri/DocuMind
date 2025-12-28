@@ -7,6 +7,7 @@ import { ALLOWED_FILE_TYPES, MAX_FILE_SIZE } from '../../utils/constants';
 export function DocumentUpload({ onUploadSuccess, compact = false }) {
   const [isDragging, setIsDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [stage, setStage] = useState(''); // 'reading', 'extracting', 'vectorizing', 'storing'
   const [progress, setProgress] = useState(0);
   const fileInputRef = useRef(null);
   const { showToast } = useToast();
@@ -29,28 +30,42 @@ export function DocumentUpload({ onUploadSuccess, compact = false }) {
 
     setUploading(true);
     setProgress(0);
+    setStage('reading');
 
     try {
-      const response = await documentService.uploadFile(file, setProgress);
+      // Transition to extracting almost immediately
+      setTimeout(() => setStage('extracting'), 500);
+
+      const response = await documentService.uploadFile(file, (p) => {
+        setProgress(p);
+        if (p > 30 && p < 75) setStage('vectorizing');
+        if (p >= 75) setStage('storing');
+      });
+
       // Track the uploaded document
       documentService.addDocument({
         title: file.name.split('.')[0],
         filename: file.name,
         size: file.size,
         type: file.type,
-        chunks: 'Unknown', // Backend doesn't return this info
+        chunks: 'Calculating...',
         preview: response.message || 'Document indexed successfully',
       });
+
+      setStage('complete');
       showToast({ type: 'success', message: 'Document uploaded and indexed successfully!' });
-      onUploadSuccess?.();
+      setTimeout(() => onUploadSuccess?.(), 1000);
     } catch (error) {
-      showToast({ 
-        type: 'error', 
-        message: error.response?.data?.detail || 'Upload failed' 
+      showToast({
+        type: 'error',
+        message: error.response?.data?.detail || 'Upload failed'
       });
     } finally {
-      setUploading(false);
-      setProgress(0);
+      setTimeout(() => {
+        setUploading(false);
+        setProgress(0);
+        setStage('');
+      }, 2000);
     }
   };
 
@@ -74,7 +89,7 @@ export function DocumentUpload({ onUploadSuccess, compact = false }) {
         {uploading && (
           <div className="space-y-2">
             <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-              <div 
+              <div
                 className="h-full bg-orange-500 transition-all duration-300"
                 style={{ width: `${progress}%` }}
               />
@@ -82,8 +97,8 @@ export function DocumentUpload({ onUploadSuccess, compact = false }) {
             <p className="text-xs text-gray-600 text-center">{progress}%</p>
           </div>
         )}
-        <Button 
-          onClick={() => fileInputRef.current?.click()} 
+        <Button
+          onClick={() => fileInputRef.current?.click()}
           disabled={uploading}
           variant="secondary"
           size="sm"
@@ -106,9 +121,8 @@ export function DocumentUpload({ onUploadSuccess, compact = false }) {
       onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
       onDragLeave={() => setIsDragging(false)}
       onDrop={handleDrop}
-      className={`border-2 border-dashed rounded-lg p-12 text-center transition-colors ${
-        isDragging ? 'border-orange-500 bg-orange-50' : 'border-gray-300'
-      }`}
+      className={`border-2 border-dashed rounded-lg p-12 text-center transition-colors ${isDragging ? 'border-orange-500 bg-orange-50' : 'border-gray-300'
+        }`}
     >
       <input
         ref={fileInputRef}
@@ -127,20 +141,36 @@ export function DocumentUpload({ onUploadSuccess, compact = false }) {
         Drag and drop or click to browse
       </p>
       {uploading && (
-        <div className="w-full max-w-xs mx-auto mb-4">
-          <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-orange-500 transition-all duration-300"
+        <div className="w-full max-w-sm mx-auto mb-6">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-xs font-bold text-orange-600 uppercase tracking-wider">
+              {stage === 'reading' && 'Reading File...'}
+              {stage === 'extracting' && 'Extracting Content...'}
+              {stage === 'vectorizing' && 'Generating Embeddings...'}
+              {stage === 'storing' && 'Storing Vectors...'}
+              {stage === 'complete' && 'Indexing Complete!'}
+            </span>
+            <span className="text-xs font-medium text-gray-500">{progress}%</span>
+          </div>
+          <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden border border-gray-200 p-0.5">
+            <div
+              className={`h-full rounded-full transition-all duration-500 ease-out ${stage === 'complete' ? 'bg-green-500' : 'bg-gradient-to-r from-orange-400 to-orange-600'}`}
               style={{ width: `${progress}%` }}
             />
           </div>
-          <p className="text-sm text-gray-600 mt-2">{progress}%</p>
+          <div className="flex items-center justify-center gap-2 mt-3">
+            <div className={`w-1.5 h-1.5 rounded-full ${stage === 'reading' ? 'bg-orange-500 animate-pulse' : 'bg-gray-300'}`} />
+            <div className={`w-1.5 h-1.5 rounded-full ${stage === 'extracting' ? 'bg-orange-500 animate-pulse' : 'bg-gray-300'}`} />
+            <div className={`w-1.5 h-1.5 rounded-full ${stage === 'vectorizing' ? 'bg-orange-500 animate-pulse' : 'bg-gray-300'}`} />
+            <div className={`w-1.5 h-1.5 rounded-full ${stage === 'storing' ? 'bg-orange-500 animate-pulse' : 'bg-gray-300'}`} />
+          </div>
         </div>
       )}
-      <Button 
-        onClick={() => fileInputRef.current?.click()} 
+      <Button
+        onClick={() => fileInputRef.current?.click()}
         disabled={uploading}
         variant="secondary"
+        className="mx-auto"
       >
         Choose File
       </Button>

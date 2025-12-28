@@ -56,10 +56,19 @@ class RAGService:
                 return {"chunk_ids": [], "parent_ids": []}
             
             # 3. Store child vectors and parent chunks concurrently
-            await asyncio.gather(
+            # We use gather to run them in parallel for speed
+            results = await asyncio.gather(
                 pinecone_service.upsert_vectors(vectors),
-                parent_chunks_service.store_parent_chunks(parent_chunks)
+                parent_chunks_service.store_parent_chunks(parent_chunks),
+                return_exceptions=True
             )
+            
+            # Check for failures in storage
+            for i, result in enumerate(results):
+                if isinstance(result, Exception) or result is False:
+                    error_msg = f"Failed to store {'vectors' if i == 0 else 'parent chunks'}"
+                    logger.error(error_msg)
+                    raise Exception(error_msg)
             
             logger.info(f"Successfully indexed {len(vectors)} child chunks for document '{document.get('title', 'Unknown')}'")
             
@@ -334,6 +343,7 @@ class RAGService:
                 logger.info(f"Using explicit response style: {actual_style}")
             
             # Unified Claude/ChatGPT-style prompt for all response styles
+            history_header = f"PREVIOUS CONVERSATION:\n{conversation_context}\n\n" if conversation_context else ""
             prompt = f"""
 You are a helpful, expert assistant. Answer the user's question in a clear, natural, and conversational style, just like Claude or ChatGPT. Use well-formatted Markdown for your response.
 
@@ -352,7 +362,7 @@ RESPONSE GUIDELINES:
 - Do not speculate or add information beyond what's provided.
 - If the user asks for a detailed answer, be thorough and cover all relevant aspects. If concise, focus on the essentials. Otherwise, balance depth and brevity.
 
-{f'PREVIOUS CONVERSATION:\n{conversation_context}\n\n' if conversation_context else ''}AVAILABLE INFORMATION:
+{history_header}AVAILABLE INFORMATION:
 {context}
 
 QUESTION: {query}

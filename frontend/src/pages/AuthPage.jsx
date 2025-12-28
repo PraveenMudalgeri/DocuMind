@@ -97,7 +97,7 @@ export function AuthPage() {
                         <img
                             src="/brand-logo.png"
                             alt="DocuMind"
-                            className="absolute min-w-[400px] min-h-[400px] object-contain scale-[1] contrast-[1.1] saturate-110"
+                            className="absolute min-w-[150px] min-h-[250px] object-contain scale-[1] contrast-[1.1] saturate-110"
                         />
                     </div>
                 </div>

@@ -182,5 +182,18 @@ class PineconeService:
             logger.error(f"Failed to delete vectors from Pinecone: {e}")
             return 0
 
+    async def delete_vectors_by_filter(self, filter_dict: Dict[str, Any]) -> bool:
+        """Delete vectors using a metadata filter."""
+        if not self.index:
+            return False
+            
+        try:
+            logger.info(f"Deleting vectors with filter: {filter_dict}")
+            self.index.delete(filter=filter_dict)
+            return True
+        except Exception as e:
+            logger.error(f"Failed to delete vectors by filter: {e}")
+            return False
+
 # Singleton instance
 pinecone_service = PineconeService()

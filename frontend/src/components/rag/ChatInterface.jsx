@@ -160,7 +160,7 @@ export function ChatInterface({ session, onSessionUpdate, selectedDocuments = []
   return (
     <div className="flex flex-col h-full">
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto px-4 md:px-6 lg:px-8 py-4 pt-6 md:pt-4">
+      <div className="flex-1 overflow-y-auto px-4 md:px-6 lg:px-8 py-4 pt-6 md:pt-4 pb-32 md:pb-4">
         {!session ? (
           <div className="flex flex-col items-center justify-center h-full text-center">
             <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mb-4">
@@ -271,8 +271,8 @@ export function ChatInterface({ session, onSessionUpdate, selectedDocuments = []
         )}
       </div>
 
-      {/* Input Area */}
-      <div className="border-t border-gray-200 bg-white px-4 md:px-6 lg:px-8 py-3 sm:py-4">
+      {/* Input Area - Fixed to bottom on mobile */}
+      <div className="fixed md:relative bottom-0 left-0 right-0 md:bottom-auto md:left-auto md:right-auto border-t border-gray-200 bg-white px-4 md:px-6 lg:px-8 py-3 sm:py-4 pb-safe z-10">
         <div className="max-w-5xl mx-auto">
           <QueryInput
             onSend={handleSendMessage}

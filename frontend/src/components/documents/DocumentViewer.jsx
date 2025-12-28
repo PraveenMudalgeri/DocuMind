@@ -25,10 +25,10 @@ export function DocumentViewer({ document, onClose }) {
 
   const renderContent = () => {
     const fileType = getFileType(document.filename);
-    
+
     if (fileType === 'pdf') {
       // Get the API URL from environment or use default
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://0.0.0.0:8000';
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://10.0.8.44:8000';
       return (
         <iframe
           src={`${apiUrl}/documents/view/${document.filename}`}
@@ -38,7 +38,7 @@ export function DocumentViewer({ document, onClose }) {
         />
       );
     }
-    
+
     if (['txt', 'md'].includes(fileType)) {
       return (
         <div className="p-6 h-full overflow-y-auto bg-gray-50">
@@ -48,7 +48,7 @@ export function DocumentViewer({ document, onClose }) {
         </div>
       );
     }
-    
+
     return (
       <div className="flex items-center justify-center h-full bg-gray-50">
         <div className="text-center p-8">
@@ -74,18 +74,16 @@ export function DocumentViewer({ document, onClose }) {
   return (
     <>
       {/* Backdrop */}
-      <div 
-        className={`fixed inset-0 bg-black transition-opacity duration-300 z-40 ${
-          isVisible ? 'bg-opacity-40' : 'bg-opacity-0'
-        }`}
+      <div
+        className={`fixed inset-0 bg-black transition-opacity duration-300 z-40 ${isVisible ? 'bg-opacity-40' : 'bg-opacity-0'
+          }`}
         onClick={handleClose}
       />
-      
+
       {/* Slide-in Panel */}
-      <div 
-        className={`fixed top-0 right-0 h-full w-full md:w-3/4 lg:w-2/3 xl:w-1/2 bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-out ${
-          isVisible ? 'translate-x-0' : 'translate-x-full'
-        }`}
+      <div
+        className={`fixed top-0 right-0 h-full w-full md:w-3/4 lg:w-2/3 xl:w-1/2 bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-out ${isVisible ? 'translate-x-0' : 'translate-x-full'
+          }`}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-white">

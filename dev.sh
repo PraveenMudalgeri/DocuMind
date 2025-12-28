@@ -84,7 +84,7 @@ log_info "Installing backend dependencies..."
 uv sync
 
 log_info "Starting backend server..."
-uv run uvicorn main:app --reload &
+uv run uvicorn main:app --host 0.0.0.0 --port 8000 --reload &
 BACKEND_PID=$!
 
 cd ..

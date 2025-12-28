@@ -154,7 +154,7 @@ export function QueryInput({ onSend, disabled, onExportChat, responseStyle = 'au
                 </button>
 
                 {showStyleMenu && (
-                  <div className="absolute bottom-full left-0 mb-2 w-52 bg-white border border-gray-100 rounded-xl shadow-2xl py-2 z-30 animate-in fade-in slide-in-from-bottom-2 duration-200">
+                  <div className="absolute bottom-full md:bottom-full left-0 mb-2 md:mb-2 w-52 bg-white border border-gray-100 rounded-xl shadow-2xl py-2 z-30 animate-in fade-in slide-in-from-bottom-2 duration-200 max-h-[60vh] overflow-y-auto">
                     <div className="px-3 py-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-widest border-b border-gray-50 mb-1">
                       Response Style
                     </div>
@@ -211,7 +211,7 @@ export function QueryInput({ onSend, disabled, onExportChat, responseStyle = 'au
                 </button>
 
                 {showExportMenu && (
-                  <div className="absolute bottom-full left-0 mb-2 w-52 bg-white border border-gray-100 rounded-xl shadow-2xl py-2 z-30 animate-in fade-in slide-in-from-bottom-2 duration-200">
+                  <div className="absolute bottom-full md:bottom-full left-0 mb-2 md:mb-2 w-52 bg-white border border-gray-100 rounded-xl shadow-2xl py-2 z-30 animate-in fade-in slide-in-from-bottom-2 duration-200 max-h-[60vh] overflow-y-auto">
                     <div className="px-3 py-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-widest border-b border-gray-50 mb-1">
                       Export Options
                     </div>

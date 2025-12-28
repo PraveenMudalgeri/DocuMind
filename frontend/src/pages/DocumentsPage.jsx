@@ -19,16 +19,18 @@ export function DocumentsPage() {
     <div className="min-h-screen bg-gray-50">
       <Header />
       <Container maxWidth="xl" className="py-12">
-        <div className="mb-8 flex items-center justify-between">
+        <div className="mb-6 md:mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-semibold text-gray-900 mb-2">Upload Documents</h1>
-            <p className="text-gray-600">Upload and manage your documents for intelligent querying</p>
+            <h1 className="text-2xl md:text-3xl font-semibold text-gray-900 mb-1 md:mb-2">Upload Documents</h1>
+            <p className="text-sm md:text-base text-gray-600">Upload and manage your documents for intelligent querying</p>
           </div>
           <Button
             variant="secondary"
             onClick={() => navigate(ROUTES.DOCUMENTS_LIST)}
+            className="w-full sm:w-auto whitespace-nowrap"
+            size="sm"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
             View All Documents
