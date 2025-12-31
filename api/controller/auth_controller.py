@@ -1,6 +1,6 @@
 from datetime import timedelta
 from fastapi import HTTPException, status
-from schema.user_schema import UserCreate, UserLogin
+from schema.user_schema import UserCreate, UserLogin, UserAPIKeysUpdate
 from schema.token_schema import Token
 from service.infrastructure.auth_service import (
     authenticate_user, 
@@ -90,6 +90,31 @@ class AuthController:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Internal server error during login"
             )
+
+    async def update_api_keys(self, user_id: str, api_keys_data: UserAPIKeysUpdate) -> dict:
+        """
+        Update user API keys
+        """
+        try:
+            success = await user_service.update_api_keys(user_id, api_keys_data.api_keys)
+            
+            if not success:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="User not found"
+                )
+            
+            return {"message": "API keys updated successfully"}
+            
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Error updating API keys: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Internal server error during API key update"
+            )
+
 
 # Singleton instance
 auth_controller = AuthController()

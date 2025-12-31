@@ -1,115 +1,292 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Header } from "../components/layout/Header";
 import { useAuth } from "../hooks/useAuth";
 import { useToast } from "../hooks/useToast";
+import { authService } from "../services/authService";
 
 export function AccountPage() {
-    const { user, logout } = useAuth();
+    const { user } = useAuth();
     const { showToast } = useToast();
+    const [activeTab, setActiveTab] = useState("profile");
 
+    // Profile State
     const [isEditing, setIsEditing] = useState(false);
     const [username, setUsername] = useState(user?.username || "");
     const [email, setEmail] = useState(user?.email || "");
 
+    // API Key State
+    const [apiKeys, setApiKeys] = useState({
+        google_api_key: "",
+        sarvam_api_key: ""
+    });
+    const [configuredProviders, setConfiguredProviders] = useState([]);
+    const [isSavingKeys, setIsSavingKeys] = useState(false);
+
+    useEffect(() => {
+        async function fetchUserData() {
+            try {
+                const userData = await authService.getCurrentUser();
+                if (userData?.user?.configured_providers) {
+                    setConfiguredProviders(userData.user.configured_providers);
+                }
+            } catch (error) {
+                console.error("Failed to fetch user data", error);
+            }
+        }
+        fetchUserData();
+    }, []);
+
     const handleUpdateProfile = (e) => {
         e.preventDefault();
-        // This would typically call an API service
         showToast({
             type: "success",
-            message: "Profile settings saved successfully",
+            message: "Profile updated successfully (Simulation)",
         });
         setIsEditing(false);
     };
 
+    const handleApiKeyChange = (provider, value) => {
+        setApiKeys(prev => ({ ...prev, [provider]: value }));
+    };
+
+    const handleSaveApiKeys = async (e) => {
+        e.preventDefault();
+
+        // Filter out empty keys to prevent accidental deletion of existing keys
+        const keysToUpdate = {};
+        Object.entries(apiKeys).forEach(([key, value]) => {
+            if (value && value.trim() !== "") {
+                keysToUpdate[key] = value;
+            }
+        });
+
+        if (Object.keys(keysToUpdate).length === 0) {
+            showToast({ type: "info", message: "No new API keys entered to save" });
+            return;
+        }
+
+        setIsSavingKeys(true);
+        try {
+            await authService.updateApiKeys(keysToUpdate);
+            showToast({ type: "success", message: "API keys updated successfully" });
+            setApiKeys({ google_api_key: "", sarvam_api_key: "" });
+            const userData = await authService.getCurrentUser();
+            if (userData?.user?.configured_providers) {
+                setConfiguredProviders(userData.user.configured_providers);
+            }
+        } catch (error) {
+            console.error("Error saving API keys:", error);
+            showToast({ type: "error", message: "Failed to save API keys" });
+        } finally {
+            setIsSavingKeys(false);
+        }
+    };
+
+    const handleRemoveKey = async (provider) => {
+        if (!window.confirm("Are you sure you want to remove this API key?")) return;
+
+        setIsSavingKeys(true);
+        try {
+            // Update with empty string to remove the keys
+            await authService.updateApiKeys({ [provider]: "" });
+            showToast({ type: "success", message: "API key removed successfully" });
+
+            // Refresh user data
+            const userData = await authService.getCurrentUser();
+            if (userData?.user?.configured_providers) {
+                setConfiguredProviders(userData.user.configured_providers);
+            }
+
+            // Clear local input if it matches
+            setApiKeys(prev => ({ ...prev, [provider]: "" }));
+        } catch (error) {
+            console.error("Error removing API key:", error);
+            showToast({ type: "error", message: "Failed to remove API key" });
+        } finally {
+            setIsSavingKeys(false);
+        }
+    };
+
+    const getKeyStatus = (provider) => {
+        const isConfigured = configuredProviders.includes(provider);
+        return (
+            <div className="flex items-center gap-2">
+                {isConfigured ? (
+                    <>
+                        <span className="text-xs font-medium text-green-600 bg-green-50 px-2 py-0.5 rounded">Configured</span>
+                        <button
+                            type="button"
+                            onClick={() => handleRemoveKey(provider)}
+                            className="text-xs text-red-500 hover:text-red-700 font-medium hover:underline"
+                        >
+                            Remove
+                        </button>
+                    </>
+                ) : (
+                    <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded">Not Set</span>
+                )}
+            </div>
+        );
+    };
+
     return (
-        <div className="min-h-screen flex flex-col bg-gray-50/50">
+        <div className="min-h-screen flex flex-col bg-white">
             <Header />
 
-            <main className="flex-1 max-w-5xl mx-auto w-full px-4 md:px-8 py-10">
-                <div className="mb-10">
-                    <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Account Settings</h1>
-                    <p className="text-gray-500 mt-2">Manage your profile, preferences, and account security.</p>
+            <main className="flex-1 max-w-5xl mx-auto w-full px-6 py-12">
+                <h1 className="text-2xl font-semibold text-gray-900 mb-8">Account Settings</h1>
+
+                {/* Tabs */}
+                <div className="flex items-center space-x-8 border-b border-gray-200 mb-8">
+                    <button
+                        onClick={() => setActiveTab("profile")}
+                        className={`pb-3 text-sm font-medium transition-colors border-b-2 ${activeTab === "profile"
+                            ? "border-orange-500 text-orange-600"
+                            : "border-transparent text-gray-500 hover:text-gray-700"
+                            }`}
+                    >
+                        Profile
+                    </button>
+                    <button
+                        onClick={() => setActiveTab("configuration")}
+                        className={`pb-3 text-sm font-medium transition-colors border-b-2 ${activeTab === "configuration"
+                            ? "border-orange-500 text-orange-600"
+                            : "border-transparent text-gray-500 hover:text-gray-700"
+                            }`}
+                    >
+                        Configuration
+                    </button>
                 </div>
 
-                <div className="max-w-2xl mx-auto">
-                    <div className="bg-white border border-gray-100 rounded-3xl shadow-sm overflow-hidden">
-                        <div className="p-8 md:p-10">
-                            <div className="flex flex-col items-center mb-10">
-                                <div className="w-20 h-20 rounded-full bg-linear-to-br from-orange-400 to-orange-600 flex items-center justify-center shadow-lg mb-4">
-                                    <span className="text-white font-bold text-3xl">
-                                        {user?.username?.[0]?.toUpperCase() || "U"}
-                                    </span>
-                                </div>
-                                <h2 className="text-2xl font-bold text-gray-900">{user?.username || "Account"}</h2>
-                                <p className="text-sm text-gray-500 mt-1">{user?.email}</p>
-                            </div>
+                {/* Tab Content */}
+                <div className="animate-fade-in-up">
+                    {activeTab === "profile" && (
+                        <div className="space-y-8">
+                            <div>
+                                <h2 className="text-base font-medium text-gray-900 mb-1">Personal Information</h2>
+                                <p className="text-sm text-gray-500 mb-6">Update your personal details here.</p>
 
-                            <form onSubmit={handleUpdateProfile} className="space-y-6">
-                                <div className="space-y-4">
+                                <form onSubmit={handleUpdateProfile} className="space-y-6 max-w-lg">
                                     <div>
-                                        <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Username</label>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1.5">Username</label>
                                         <input
                                             type="text"
                                             value={username}
                                             onChange={(e) => setUsername(e.target.value)}
                                             disabled={!isEditing}
-                                            className="w-full px-5 py-3.5 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-sm disabled:cursor-not-allowed disabled:opacity-75 font-medium"
+                                            className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-sm disabled:bg-gray-50 disabled:text-gray-500"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Email Address</label>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
                                         <input
                                             type="email"
                                             value={email}
                                             onChange={(e) => setEmail(e.target.value)}
                                             disabled={!isEditing}
-                                            className="w-full px-5 py-3.5 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-sm disabled:cursor-not-allowed disabled:opacity-75 font-medium"
+                                            className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-sm disabled:bg-gray-50 disabled:text-gray-500"
                                         />
                                     </div>
-                                </div>
 
-                                <div className="flex flex-col items-center gap-4 pt-6">
-                                    {!isEditing ? (
-                                        <button
-                                            type="button"
-                                            onClick={() => setIsEditing(true)}
-                                            className="w-full py-3 bg-gray-900 text-white rounded-2xl font-bold text-sm hover:bg-gray-800 transition-all active:scale-95"
-                                        >
-                                            Edit Profile
-                                        </button>
-                                    ) : (
-                                        <div className="flex items-center gap-3 w-full">
-                                            <button
-                                                type="submit"
-                                                className="flex-1 py-3 bg-orange-600 text-white rounded-2xl font-bold text-sm hover:bg-orange-700 shadow-lg shadow-orange-200 transition-all active:scale-95"
-                                            >
-                                                Save
-                                            </button>
+                                    <div className="pt-2">
+                                        {!isEditing ? (
                                             <button
                                                 type="button"
-                                                onClick={() => setIsEditing(false)}
-                                                className="px-6 py-3 bg-gray-100 text-gray-600 rounded-2xl font-bold text-sm hover:bg-gray-200 transition-all"
+                                                onClick={() => setIsEditing(true)}
+                                                className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
                                             >
-                                                Cancel
+                                                Edit Profile
                                             </button>
-                                        </div>
-                                    )}
-
-                                    <div className="pt-8 border-t border-gray-50 w-full flex justify-center">
-                                        <button
-                                            type="button"
-                                            className="text-xs font-bold text-red-500 hover:text-red-600 transition-colors uppercase tracking-widest flex items-center gap-2 px-4 py-2 hover:bg-red-50 rounded-lg"
-                                        >
-                                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                            </svg>
-                                            Delete Account
-                                        </button>
+                                        ) : (
+                                            <div className="flex items-center gap-3">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setIsEditing(false)}
+                                                    className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
+                                                >
+                                                    Cancel
+                                                </button>
+                                                <button
+                                                    type="submit"
+                                                    className="px-4 py-2 bg-orange-600 text-white rounded-lg text-sm font-medium hover:bg-orange-700 transition-colors shadow-sm"
+                                                >
+                                                    Save Changes
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
+                                </form>
+                            </div>
+
+                            <hr className="border-gray-100" />
+
+                            <div>
+                                <h2 className="text-base font-medium text-red-600 mb-4">Danger Zone</h2>
+                                <button
+                                    type="button"
+                                    className="px-4 py-2 bg-white border border-red-200 text-red-600 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors"
+                                >
+                                    Delete Account
+                                </button>
+                                <p className="text-xs text-gray-400 mt-2">
+                                    Permanently remove your account and all of its contents from our platform. This action is not reversible.
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === "configuration" && (
+                        <div>
+                            <div className="mb-6">
+                                <h2 className="text-base font-medium text-gray-900 mb-1">API Configuration</h2>
+                                <p className="text-sm text-gray-500">Configure your API keys for search and AI capabilities.</p>
+                            </div>
+
+                            <form onSubmit={handleSaveApiKeys} className="space-y-6 max-w-lg">
+                                {/* Gemini */}
+                                <div>
+                                    <div className="flex justify-between items-center mb-1.5">
+                                        <label className="block text-sm font-medium text-gray-700">Google Gemini API Key</label>
+                                        {getKeyStatus("google_api_key")}
+                                    </div>
+                                    <input
+                                        type="password"
+                                        placeholder={configuredProviders.includes("google_api_key") ? "••••••••••••••••••••••••" : "Enter API Key"}
+                                        value={apiKeys.google_api_key}
+                                        onChange={(e) => handleApiKeyChange("google_api_key", e.target.value)}
+                                        className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-sm font-mono placeholder:text-gray-300"
+                                    />
+                                    <p className="text-xs text-gray-400 mt-1.5">Required for advanced reasoning and content generation.</p>
+                                </div>
+
+                                {/* Sarvam */}
+                                <div>
+                                    <div className="flex justify-between items-center mb-1.5">
+                                        <label className="block text-sm font-medium text-gray-700">Sarvam API Key</label>
+                                        {getKeyStatus("sarvam_api_key")}
+                                    </div>
+                                    <input
+                                        type="password"
+                                        placeholder={configuredProviders.includes("sarvam_api_key") ? "••••••••••••••••••••••••" : "Enter API Key"}
+                                        value={apiKeys.sarvam_api_key}
+                                        onChange={(e) => handleApiKeyChange("sarvam_api_key", e.target.value)}
+                                        className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-sm font-mono placeholder:text-gray-300"
+                                    />
+                                    <p className="text-xs text-gray-400 mt-1.5">Optional. Enables specialized Indic language speech & text processing.</p>
+                                </div>
+
+                                <div className="pt-4">
+                                    <button
+                                        type="submit"
+                                        disabled={isSavingKeys}
+                                        className="px-4 py-2 bg-orange-600 text-white rounded-lg text-sm font-medium hover:bg-orange-700 transition-colors shadow-sm disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2"
+                                    >
+                                        {isSavingKeys ? "Saving..." : "Save Configuration"}
+                                    </button>
                                 </div>
                             </form>
                         </div>
-                    </div>
+                    )}
                 </div>
             </main>
         </div>

@@ -157,7 +157,7 @@ export function DatabaseChatInterface({ activeConnection, onExecuteQuery }) {
                             </div>
                             <h3 className="text-xl font-semibold text-gray-900 mb-2">Database Assistant</h3>
                             <p className="text-sm text-gray-500 max-w-sm mb-8">
-                                Ask natural language questions to query your database. DocuMind will generate and execute SQL for you.
+                                Ask natural language questions to query your database. QueryWise will generate and execute SQL for you.
                             </p>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-2xl w-full">
                                 {exampleQueries.map((example, index) => (

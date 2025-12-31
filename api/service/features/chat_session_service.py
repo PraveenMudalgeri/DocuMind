@@ -89,11 +89,7 @@ class ChatSessionService:
             }
             
             # Logic to update title on first user message
-            if role == "user":
-                # Fire and forget title update to not block the response
-                # In a real async queue this would be better, but we'll await it for now to ensure it happens
-                # functionality over perf for this specific first-message use case
-                await self.update_session_title_if_needed(session_id, username, content)
+            # REMOVED: Managed explicitly by controller to ensure correct API key usage
             
             result = await collection.update_one(
                 {"session_id": session_id, "username": username},
@@ -105,7 +101,7 @@ class ChatSessionService:
             logger.error(f"Error adding message to {session_id}: {e}")
             return False
             
-    async def update_session_title_if_needed(self, session_id: str, username: str, content: str):
+    async def update_session_title_if_needed(self, session_id: str, username: str, content: str, api_key: str = None):
         """Helper to update title if it's currently 'New Chat'."""
         try:
             collection = await self.get_collection()
@@ -113,14 +109,15 @@ class ChatSessionService:
             
             if session and session.get("title") == "New Chat":
                 from service.rag.gemini_service import gemini_service
-                await gemini_service.initialize_gemini()
-                new_title = await gemini_service.generate_chat_title(content)
+                # await gemini_service.initialize_gemini() # Deprecated
+                new_title = await gemini_service.generate_chat_title(content, api_key=api_key)
                 
-                await collection.update_one(
-                    {"session_id": session_id},
-                    {"$set": {"title": new_title}}
-                )
-                logger.info(f"Auto-named session {session_id} to '{new_title}'")
+                if new_title and new_title != "New Chat":
+                    await collection.update_one(
+                        {"session_id": session_id},
+                        {"$set": {"title": new_title}}
+                    )
+                    logger.info(f"Auto-named session {session_id} to '{new_title}'")
         except Exception as e:
             logger.error(f"Error updating title: {e}")
     

@@ -125,9 +125,15 @@ class RAGController:
         response_style = query_request.response_style or "auto"
         retrieval_multiplier = query_request.retrieval_multiplier or 4
         username = user.get('username')
+        api_keys = user.get('api_keys', {})
+
         logger.info(f"User '{username}' query: '{query[:50]}...' | style: '{response_style}' | top_k: {top_k} | multiplier: {retrieval_multiplier}")
         logger.info(f"Document filter: {documents} (type: {type(documents)})")
         
+        # If documents is an empty list, treat it as None (Search All) rather than "filter by nothing"
+        if documents is not None and len(documents) == 0:
+            documents = None
+
         if documents:
             logger.info(f"Filtering to {len(documents)} documents: {documents}")
 
@@ -142,11 +148,24 @@ class RAGController:
             
             # 1. [Pre-Retrieval Module] Enhance the query (e.g., with HyDE)
             try:
-                enhanced_query = await rag_service.pre_retrieval_module(query)
+                enhanced_query = await rag_service.pre_retrieval_module(query, api_keys=api_keys)
             except Exception as e:
                 logger.warning(f"Pre-retrieval failed: {e}. Using original query.")
                 enhanced_query = query
             
+            # Get user documents to provide high-level context
+            user_docs = await user_documents_service.get_user_documents(username)
+            
+            # Filter based on selected documents if provided
+            if documents:
+                user_docs = [doc for doc in user_docs if doc.get('filename') in documents]
+                
+            current_doc_descriptions = [
+                f"{doc.get('title', 'Untitled')}: {doc.get('description', 'No description')}" 
+                for doc in user_docs 
+                if doc.get('description')
+            ]
+
             # 2. [Retrieval Module] Retrieve documents with enhanced diversity and relevance filtering
             # Use retrieval_multiplier to cast a wider net for better quality selection
             retrieval_pool_size = min(top_k * retrieval_multiplier, 50)  # Cap at 50 for performance
@@ -160,21 +179,18 @@ class RAGController:
             )
 
             # Handle case where no documents are retrieved
+            # NEW STRATEGY: If no chunks found, but user has documents, let the LLM answer using 
+            # the document descriptions/summaries. This allows for general questions about what documents exist.
             if not retrieved_chunks:
-                logger.warning(f"No documents retrieved for query: '{query}'")
+                logger.warning(f"No documents retrieved for query: '{query}'. Proceeding with document summaries only.")
                 
-                # Check if user has any documents at all
-                user_docs = await user_documents_service.get_user_documents(username)
                 if not user_docs:
                      return QueryResponse(
                         answer="You haven't uploaded any documents yet. Please upload a document to start chatting.",
                         sources=[]
                     )
-                
-                return QueryResponse(
-                    answer="I scanned your documents but couldn't find any content that directly matches your question. You might try:\n1. Rephrasing your query\n2. Checking if the information is in your uploaded files",
-                    sources=[]
-                )
+                # We will proceed to generation with empty chunks but populated descriptions
+
 
             # 3. [Post-Retrieval Module] Rerank with adaptive selection based on quality
             #    Note: Reranking is done on the ORIGINAL query for maximum accuracy.
@@ -189,34 +205,64 @@ class RAGController:
             final_context_chunks = reranked_chunks if reranked_chunks else []
 
             # Handle case where reranking returns empty results
-            if not final_context_chunks:
-                logger.warning(f"No relevant context after reranking for query: '{query}'")
-                return QueryResponse(
+            if not final_context_chunks and not current_doc_descriptions:
+                 logger.warning(f"No relevant context after reranking for query: '{query}' and no document summaries available.")
+                 return QueryResponse(
                     answer="I found some documents but none seem relevant to your specific question. Please try rephrasing your query.",
                     sources=[]
                 )
+            
+            # If we have descriptions but no chunks, we proceed to generation
+
 
             # 4. [Generation Module] Generate the answer from the refined context with chat history and response style
-            final_answer = await rag_service.generation_module(query, final_context_chunks, chat_history, response_style)
+            final_answer = await rag_service.generation_module(
+                query=query, 
+                context_chunks=final_context_chunks, 
+                chat_history=chat_history, 
+                document_descriptions=current_doc_descriptions,
+                api_keys=api_keys
+            )
             
             # 5. Format the sources for the final response
             sources = []
-            for chunk in final_context_chunks:
-                metadata = chunk.get('metadata', {})
-                sources.append(SourceDocument(
-                    id=chunk.get('id', 'unknown_id'),
-                    content=metadata.get('content', ''),
-                    title=metadata.get('title'),
-                    score=chunk.get('score') # The reranker should add a score
-                ))
+            if final_context_chunks:
+                for chunk in final_context_chunks:
+                    metadata = chunk.get('metadata', {})
+                    sources.append(SourceDocument(
+                        id=chunk.get('id', 'unknown_id'),
+                        content=metadata.get('content', ''),
+                        title=metadata.get('title'),
+                        score=chunk.get('score')
+                    ))
+            elif user_docs:
+                # Fallback: If no chunks were used but we had documents (and presumably used their descriptions),
+                # list them as sources so the user knows what was considered.
+                # We limit to 5 to avoid cluttering the UI if there are many.
+                for doc in user_docs[:5]:
+                    sources.append(SourceDocument(
+                        id=str(doc.get('_id', 'unknown')),
+                        content=doc.get('description', 'Document Overview/Summary'),
+                        title=doc.get('title'),
+                        score=1.0
+                    ))
             
+            # Append sources to the final answer for visibility in chat
+            if sources:
+                final_answer += "\n\n**Sources:**\n"
+                for i, source in enumerate(sources, 1):
+                    # Clean up title
+                    title = source.title or "Untitled Document"
+                    final_answer += f"{i}. {title}\n"
+
             # Save to chat session if session_id provided
             if session_id:
                 # Add user message
                 await chat_session_service.add_message(session_id, username, "user", query)
                 
                 # Check if we need to update title (first message heuristic done in service now or helper)
-                await chat_session_service.update_session_title_if_needed(session_id, username, query)
+                # Pass API key for title generation
+                await chat_session_service.update_session_title_if_needed(session_id, username, query, api_keys.get("google_api_key"))
 
                 # Add assistant message with sources
                 sources_dict = [s.model_dump() for s in sources]
@@ -238,6 +284,7 @@ class RAGController:
         Controller logic to handle file upload, extract text, generate description, and then index it.
         """
         logger.info(f"User '{user.get('username')}' uploaded file: '{file.filename}' for indexing.")
+        api_keys = user.get('api_keys', {})
 
         # 1. Extract text from the uploaded file
         extracted_data = await file_processing_service.extract_text_from_file(file)
@@ -250,10 +297,10 @@ class RAGController:
 
         # 2. Generate a description using Gemini
         from service.rag.gemini_service import gemini_service
-        await gemini_service.initialize_gemini()
         description = await gemini_service.generate_description(
             content=extracted_data["content"],
-            title=extracted_data["title"]
+            title=extracted_data["title"],
+            api_key=api_keys.get("google_api_key")
         )
 
         # 3. Create a DocumentPayload from the extracted content and description

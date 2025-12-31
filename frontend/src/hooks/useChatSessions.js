@@ -101,8 +101,9 @@ export function useChatSessions() {
           // Reuse the existing empty chat
           setCurrentSessionId(sessionsList[0].session_id);
         } else {
-          // Create new session if no empty session exists
-          await createSession('New Chat');
+          // Do not create a new session automatically. 
+          // Just set currentSessionId to null so the specific "New Chat" UI is shown.
+          setCurrentSessionId(null);
         }
       } catch (error) {
         console.error('Error initializing sessions:', error);

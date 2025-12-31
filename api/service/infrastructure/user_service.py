@@ -1,8 +1,10 @@
-from typing import Optional, Dict, Any
+from typing import List, Dict, Optional, Any
 from service.infrastructure.database_service import database_service
+from lib.security import security_service
 from datetime import datetime
 import uuid
 import logging
+
 
 logger = logging.getLogger(__name__)
 
@@ -97,5 +99,58 @@ class UserService:
             logger.error(f"Error fetching user by email {email}: {e}")
             return None
 
+
+    async def update_api_keys(self, user_id: str, api_keys: Dict[str, str]) -> bool:
+        """Update user API keys securely."""
+        try:
+            collection = await self.get_collection()
+            
+            # Fetch existing user to get current keys (to merge if needed, or just overwrite)
+            user = await collection.find_one({"user_id": user_id})
+            if not user:
+                return False
+                
+            current_keys = user.get("api_keys", {})
+            
+            # Encrypt and update keys
+            for provider, key in api_keys.items():
+                if key: # If key is provided
+                    current_keys[provider] = security_service.encrypt_value(key)
+                elif provider in current_keys and key == "": 
+                    # If empty string provided, remove the key
+                    del current_keys[provider]
+            
+            await collection.update_one(
+                {"user_id": user_id},
+                {"$set": {"api_keys": current_keys}}
+            )
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error updating API keys for user {user_id}: {e}")
+            raise e
+
+    async def get_decrypted_api_keys(self, user_id: str) -> Dict[str, str]:
+        """Retrieve decrypted API keys for a user."""
+        try:
+            collection = await self.get_collection()
+            user = await collection.find_one({"user_id": user_id})
+            
+            if not user or "api_keys" not in user:
+                return {}
+            
+            decrypted_keys = {}
+            for provider, encrypted_key in user["api_keys"].items():
+                val = security_service.decrypt_value(encrypted_key)
+                if val:
+                    decrypted_keys[provider] = val
+                
+            return decrypted_keys
+            
+        except Exception as e:
+            logger.error(f"Error fetching API keys for user {user_id}: {e}")
+            return {}
+
 # Singleton instance
+
 user_service = UserService()

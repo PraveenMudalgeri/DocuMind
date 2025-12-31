@@ -1,10 +1,13 @@
 @import "tailwindcss";
 
+
+
 @keyframes slide-in-right {
   from {
     transform: translateX(100%);
     opacity: 0;
   }
+
   to {
     transform: translateX(0);
     opacity: 1;
@@ -112,11 +115,13 @@
 }
 
 .min-h-screen-safe {
-  min-height: 100vh; /* Fallback */
+  min-height: 100vh;
+  /* Fallback */
   min-height: 100dvh;
 }
 
 .h-screen-safe {
-  height: 100vh; /* Fallback */
+  height: 100vh;
+  /* Fallback */
   height: 100dvh;
 }

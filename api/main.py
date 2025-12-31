@@ -25,7 +25,7 @@ async def lifespan(app: FastAPI):
     Handles startup and shutdown events.
     Only connects to database on startup to avoid serverless cold-start failures.
     """
-    logger.info("Starting DocuMind API...")
+    logger.info("Starting QueryWise API...")
     
     # Connect to MongoDB
     try:
@@ -55,13 +55,13 @@ async def lifespan(app: FastAPI):
     yield  # Application is running
 
     # Shutdown
-    logger.info("Shutting down DocuMind API...")
+    logger.info("Shutting down QueryWise API...")
     await database_service.close()
     logger.info("MongoDB connection closed.")
 
 # --- FastAPI application ---
 app = FastAPI(
-    title="DocuMind API",
+    title="QueryWise API",
     description="Modular RAG backend with JWT auth, MongoDB, and Pinecone",
     version="1.0.0",
     lifespan=lifespan
@@ -79,11 +79,11 @@ app.add_middleware(
 # --- Health check endpoints ---
 @app.get("/")
 async def root():
-    return {"message": "DocuMind API is running", "status": "healthy"}
+    return {"message": "QueryWise API is running", "status": "healthy"}
 
 @app.get("/health")
 async def health_check():
-    return {"status": "healthy", "service": "DocuMind API"}
+    return {"status": "healthy", "service": "QueryWise API"}
 
 # --- Include API routers ---
 app.include_router(auth_router)

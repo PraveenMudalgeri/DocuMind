@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { VoiceInput } from './VoiceInput';
 
-export function QueryInput({ onSend, disabled, onExportChat, responseStyle = 'auto', onResponseStyleChange, onAttachClick }) {
+export function QueryInput({ onSend, disabled, onExportChat, responseStyle = 'auto', onResponseStyleChange, onAttachClick, showDisclaimer = true }) {
   const [query, setQuery] = useState('');
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [showStyleMenu, setShowStyleMenu] = useState(false);
@@ -111,7 +111,7 @@ export function QueryInput({ onSend, disabled, onExportChat, responseStyle = 'au
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Message DocuMind..."
+              placeholder="Message QueryWise..."
               disabled={disabled}
               className="w-full bg-transparent border-none focus:ring-0 focus:outline-none outline-none text-gray-800 placeholder-gray-400 resize-none text-[14px] leading-snug py-1 max-h-[100px] overflow-y-auto font-sans"
               style={{ minHeight: '32px' }}
@@ -232,9 +232,11 @@ export function QueryInput({ onSend, disabled, onExportChat, responseStyle = 'au
           </div>
         </form>
       </div>
-      <p className="text-[11px] text-gray-400 text-center mt-2 tracking-tight">
-        DocuMind can make mistakes. Check important info.
-      </p>
+      {showDisclaimer && (
+        <p className="text-[11px] text-gray-400 text-center mt-2 tracking-tight">
+          QueryWise can make mistakes. Check important info.
+        </p>
+      )}
     </div>
   );
 }

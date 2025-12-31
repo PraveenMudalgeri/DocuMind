@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { Header } from "../components/layout/Header";
 import { chatService } from "../services/chatService";
 import { exportService } from "../services/exportService";
+import { documentService } from "../services/documentService";
+import { authService } from "../services/authService";
 import { ChatInterface } from "../components/rag/ChatInterface";
 import { ChatSidebar } from "../components/chat/ChatSidebar";
 import { RightSidebar } from "../components/layout/RightSidebar";
@@ -29,9 +31,12 @@ export function ChatPage() {
 
   const handleNewSession = async () => {
     try {
-      await createSession();
+      const newSession = await createSession();
+      if (newSession) {
+        selectSession(newSession.session_id);
+      }
     } catch (error) {
-      console.error("Error creating session:", error);
+      console.error("Failed to create new session:", error);
     }
   };
 
@@ -62,12 +67,52 @@ export function ChatPage() {
     setSessionToDelete(null);
   };
 
+  const [allDocuments, setAllDocuments] = useState([]);
+
+  // Fetch all documents on mount and when sidebar uploads success
+  useEffect(() => {
+    loadDocuments();
+  }, []);
+
+  const loadDocuments = async () => {
+    try {
+      const docs = await documentService.getDocuments();
+      setAllDocuments(docs);
+    } catch (error) {
+      console.error("Failed to load documents:", error);
+    }
+  };
+
+  // Check for API Configuration
+  const [missingApiKey, setMissingApiKey] = useState(false);
+
+  useEffect(() => {
+    const checkApiConfiguration = async () => {
+      try {
+        const userData = await authService.getCurrentUser();
+        const providers = userData?.user?.configured_providers || [];
+        if (!providers.includes("google_api_key")) {
+          setMissingApiKey(true);
+        } else {
+          setMissingApiKey(false);
+        }
+      } catch (error) {
+        console.error("Failed to check API configuration", error);
+      }
+    };
+    checkApiConfiguration();
+  }, []);
+
   const handleUploadSuccess = () => {
     // Toast already shown by DocumentUpload component
     refreshSessions();
+    loadDocuments(); // Refresh document list
   };
 
-  // Sync selected documents when session changes
+  // Sync selected documents when session changes using filename matching
+  // This also handles the case where a document was deleted; it simply won't be found in allDocuments if we filtered here.
+  // However, currentSession.selected_documents contains filenames. We pass these to ChatSidebar to control checkboxes.
+  // We pass allDocuments to ChatInterface so it can derive titles and validity.
   useEffect(() => {
     if (currentSession?.selected_documents) {
       setSelectedDocuments(currentSession.selected_documents);
@@ -75,6 +120,10 @@ export function ChatPage() {
       setSelectedDocuments([]);
     }
   }, [currentSession]);
+
+  // ... (rest of code)
+
+
 
   const handleDocumentSelectionChange = (docs) => {
     setSelectedDocuments(docs);
@@ -85,15 +134,14 @@ export function ChatPage() {
     }
   };
 
-  const handleTitleUpdate = async (newTitle) => {
-    if (currentSessionId && newTitle) {
-      try {
-        await chatService.updateSessionTitle(currentSessionId, newTitle);
-        refreshCurrentSession(); // Refresh current session to show new title in header if needed
-        refreshSessions();      // Refresh sidebar list
-      } catch (error) {
-        console.error("Failed to update title:", error);
-      }
+  const handleRenameSession = async (sessionId, newTitle) => {
+    if (!sessionId || !newTitle) return;
+    try {
+      await chatService.updateSessionTitle(sessionId, newTitle);
+      if (sessionId === currentSessionId) refreshCurrentSession();
+      refreshSessions();
+    } catch (error) {
+      console.error("Failed to update title:", error);
     }
   };
 
@@ -140,6 +188,7 @@ export function ChatPage() {
             onClose={() => setShowLeftSidebar(false)}
             showUpload={showUploadInSidebar}
             onShowUploadChange={setShowUploadInSidebar}
+            onRenameSession={handleRenameSession}
           />
         </div>
 
@@ -153,6 +202,26 @@ export function ChatPage() {
 
         {/* Main Chat Area */}
         <div className="flex-1 flex flex-col bg-white relative overflow-hidden">
+          {/* Missing API Key Banner */}
+          {missingApiKey && (
+            <div className="bg-orange-50 border-b border-orange-100 px-4 py-3 flex items-center justify-between z-20">
+              <div className="flex items-center gap-2">
+                <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <p className="text-sm text-orange-800">
+                  <span className="font-medium">Configuration Required:</span> Please set your Google Gemini API key to start chatting.
+                </p>
+              </div>
+              <a
+                href="/account"
+                className="text-sm font-medium text-orange-600 hover:text-orange-700 whitespace-nowrap bg-white px-3 py-1.5 rounded-md border border-orange-200 shadow-sm hover:shadow transition-all"
+              >
+                Configure Keys
+              </a>
+            </div>
+          )}
+
           {/* Refined Mobile Header - Minimalist & Elegant */}
           <div className="md:hidden flex items-center h-14 px-4 bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-40">
             <button
@@ -219,8 +288,9 @@ export function ChatPage() {
           <ChatInterface
             session={currentSession}
             onSessionUpdate={refreshCurrentSession}
-            onTitleUpdate={handleTitleUpdate}
+            onTitleUpdate={(newTitle) => handleRenameSession(currentSessionId, newTitle)}
             selectedDocuments={selectedDocuments}
+            availableDocuments={allDocuments}
             onAttachDocuments={() => {
               setShowLeftSidebar(true);
               setShowUploadInSidebar(true);

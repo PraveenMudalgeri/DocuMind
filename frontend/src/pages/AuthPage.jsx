@@ -114,11 +114,11 @@ export function AuthPage() {
 
                 {/* Logo - Optimized for the vertical image provided with curved border */}
                 <div className="flex flex-col items-center mb-4">
-                    <div className="relative h-20 w-80 overflow-hidden flex items-center justify-center bg-gradient-to-br from-orange-50 to-slate-50 rounded-2xl border border-slate-200 shadow-sm">
+                    <div className="flex items-center justify-center gap-3 mb-2">
                         <img
                             src="/brand-logo.png"
-                            alt="DocuMind"
-                            className="absolute min-w-[150px] min-h-[250px] object-contain scale-[1] contrast-[1.1] saturate-110"
+                            alt="QueryWise"
+                            className="h-16 w-auto object-contain"
                         />
                     </div>
                 </div>
@@ -142,7 +142,7 @@ export function AuthPage() {
                     <p className="text-slate-600 mb-6">
                         {isLogin
                             ? "Welcome back! Sign in to continue."
-                            : "Join DocuMind to start chatting with your documents."}
+                            : "Join QueryWise to start chatting with your documents."}
                     </p>
 
                     <form onSubmit={isLogin ? handleLogin : handleSignup} className="space-y-4">

@@ -83,7 +83,7 @@ class RAGService:
             logger.error(f"Error in indexing module: {e}")
             return {"chunk_ids": [], "parent_ids": []}
 
-    async def pre_retrieval_module(self, query: str) -> str:
+    async def pre_retrieval_module(self, query: str, api_keys: Dict[str, str] = {}) -> str:
         """
         [Module: Pre-Retrieval] Enhances the query using Hypothetical Document Embeddings (HyDE).
         It generates a hypothetical answer to the query, which is often semantically closer
@@ -96,7 +96,8 @@ class RAGService:
                 f"Please write a short, hypothetical passage that answers the following question. "
                 f"This passage will be used to retrieve relevant documents.\n\nQuestion: {query}"
             )
-            hypothetical_answer = await gemini_service.generate_answer(hyde_prompt)
+            google_key = api_keys.get("google_api_key")
+            hypothetical_answer = await gemini_service.generate_answer(hyde_prompt, api_key=google_key)
             enhanced_query = f"{query}\n\n{hypothetical_answer}"
             logger.info(f"Generated hypothetical document for query: '{query}'")
             return enhanced_query # The embedding of this is used for retrieval
@@ -275,51 +276,20 @@ class RAGService:
             logger.info(f"Using fallback: returning top {len(fallback)} chunks by retrieval score")
             return fallback
 
-    def _detect_response_style(self, query: str) -> str:
-        """
-        Detect the desired response style from the user's query.
-        Returns: 'detailed', 'concise', or 'balanced'
-        """
-        query_lower = query.lower()
-        
-        # Keywords indicating detailed response
-        detailed_keywords = [
-            'explain', 'detail', 'elaborate', 'in depth', 'comprehensive', 
-            'thorough', 'complete', 'full', 'everything', 'all', 'describe',
-            'how does', 'why does', 'what are all', 'tell me about', 'walk me through'
-        ]
-        
-        # Keywords indicating concise response
-        concise_keywords = [
-            'brief', 'summary', 'summarize', 'quick', 'short', 'simple',
-            'tldr', 'tl;dr', 'in short', 'overview', 'main points', 'key points',
-            'just tell me', 'simply', 'what is', 'define', 'list'
-        ]
-        
-        # Check for concise indicators first (more specific)
-        for keyword in concise_keywords:
-            if keyword in query_lower:
-                return 'concise'
-        
-        # Check for detailed indicators
-        for keyword in detailed_keywords:
-            if keyword in query_lower:
-                return 'detailed'
-        
-        # Default to balanced
-        return 'balanced'
 
-    async def generation_module(self, query: str, context_chunks: List[Dict[str, Any]], chat_history: List[Dict[str, Any]] = None, response_style: str = "auto") -> str:
+
+    async def generation_module(self, query: str, context_chunks: List[Dict[str, Any]], chat_history: List[Dict[str, Any]] = None, document_descriptions: List[str] = None, api_keys: Dict[str, str] = {}) -> str:
         """
         [Module: Generation] Generates answers optimized for TTS with adaptive detail level.
         Uses full chat history and retrieved context for context-aware responses.
-        Adapts response length and detail based on response_style parameter.
+        Adapts response length and detail based on validation by the LLM itself.
         
         Args:
             query: The user's current question
             context_chunks: Retrieved and reranked document chunks
             chat_history: Previous messages in the conversation (optional)
-            response_style: 'auto', 'detailed', 'concise', or 'balanced'
+            document_descriptions: List of descriptions of available documents (always included)
+            api_keys: Dictionary containing user-specific API keys
         """
         try:
             # Build context from chunks - include ALL retrieved content
@@ -343,31 +313,19 @@ class RAGService:
                 
                 conversation_context = "\n".join(history_parts)
             
-            # Determine actual response style
-            if response_style == "auto":
-                actual_style = self._detect_response_style(query)
-                logger.info(f"Auto-detected response style: {actual_style}")
-            else:
-                actual_style = response_style
-                logger.info(f"Using explicit response style: {actual_style}")
+            # Prepare document overview section
+            doc_overview = ""
+            if document_descriptions:
+                doc_overview = "DOCUMENT OVERVIEW:\n" + "\n".join([f"- {desc}" for desc in document_descriptions]) + "\n\n"
             
             # Unified Claude/ChatGPT-style prompt for all response styles
             history_header = f"PREVIOUS CONVERSATION:\n{conversation_context}\n\n" if conversation_context else ""
             
-            # Define style instructions based on detection
-            style_instruction = ""
-            if actual_style == "detailed":
-                style_instruction = "Provide a comprehensive, detailed answer. elaborate on key points and ensure thorough coverage of the topic."
-            elif actual_style == "concise":
-                style_instruction = "Provide a brief, concise summary. Focus only on the most important facts and avoid unnecessary detail."
-            else:
-                style_instruction = "Balance depth and brevity. Provide enough detail to be helpful but remain direct and to the point."
-
             prompt = f"""
 You are a helpful, expert assistant. Answer the user's question in a clear, natural, and conversational style, just like Claude or ChatGPT. Use well-formatted Markdown for your response.
 
 RESPONSE GUIDELINES:
-- **STYLE: {style_instruction}**
+- **STYLE**: Auto-detect the user's desired detail level (concise vs detailed) from their query and adapt accordingly. If unsure, default to a balanced, helpful explanation.
 - Write as if you are having a friendly, professional conversation.
 - Use natural, flowing language and organize information logically.
 - Structure your answer with:
@@ -377,11 +335,12 @@ RESPONSE GUIDELINES:
     - `Code blocks` for technical terms, code, or commands
     - Italics for emphasis
 - Use multiple paragraphs for clarity and readability.
-- Avoid referencing "the document" or "according to the text"; just provide the information directly.
-- If the context doesn't contain the answer, say: "I don't have information about that specific aspect."
+- **DOCUMENT CONTEXT**: Use the provided "AVAILABLE INFORMATION" (specific chunks) and "DOCUMENT OVERVIEW" (general summaries) to answer.
+- If specific chunks are missing but the "DOCUMENT OVERVIEW" is relevant, mention what the documents seem to cover generally.
+- If the context doesn't contain the answer, say: "I don't have information about that specific aspect in the provided documents."
 - Do not speculate or add information beyond what's provided.
 
-{history_header}AVAILABLE INFORMATION:
+{history_header}{doc_overview}AVAILABLE INFORMATION:
 {context}
 
 QUESTION: {query}
@@ -389,10 +348,11 @@ QUESTION: {query}
 Provide your answer below in Markdown, as if you are Claude or ChatGPT. Do not mention that you are an AI or reference the source documents. Present the information naturally and helpfully.
 """
             
-            answer = await gemini_service.generate_answer(prompt)
+            google_key = api_keys.get("google_api_key")
+            answer = await gemini_service.generate_answer(prompt, api_key=google_key)
             
             # Keep the markdown formatting - don't strip it
-            logger.info(f"Generated {actual_style} markdown answer for query: {query[:50]}... (length: {len(answer)} chars)")
+            logger.info(f"Generated markdown answer for query: {query[:50]}... (length: {len(answer)} chars)")
             return answer
             
         except Exception as e:

@@ -135,11 +135,10 @@ export function HomePage() {
         <div className="max-w-6xl mx-auto px-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-8">
             <div className="flex items-center gap-2">
-              <div className="relative w-40 h-8 overflow-hidden flex items-center justify-center">
-                <img src="/brand-logo.png" alt="DocuMind" className="absolute min-w-[120px] min-h-[250px] object-contain scale-[1.2] contrast-[1.1] saturate-110" />
-              </div>
+              <img src="/brand-logo.png" alt="QueryWise" className="h-8 w-auto object-contain" />
             </div>
-            <p className="text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em]">© 2025 DocuMind AI • All rights reserved.</p>
+
+            <p className="text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em]">© 2025 QueryWise AI • All rights reserved.</p>
             <div className="flex items-center gap-8">
               <a href="#" className="text-[10px] font-bold text-slate-400 hover:text-slate-900 transition-colors uppercase tracking-[0.2em]">Privacy</a>
               <a href="#" className="text-[10px] font-bold text-slate-400 hover:text-slate-900 transition-colors uppercase tracking-[0.2em]">Terms</a>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../utils/constants';
 import { DocumentUpload } from '../documents/DocumentUpload';
@@ -16,9 +16,46 @@ export function ChatSidebar({
   onDocumentSelectionChange,
   onClose,
   showUpload: externalShowUpload,
-  onShowUploadChange
+  onShowUploadChange,
+  onRenameSession
 }) {
   const [internalShowUpload, setInternalShowUpload] = useState(false);
+
+  // Title Editing State
+  const [editingSessionId, setEditingSessionId] = useState(null);
+  const [editTitle, setEditTitle] = useState("");
+  const editInputRef = useRef(null);
+
+  // Focus input when editing starts
+  useEffect(() => {
+    if (editingSessionId && editInputRef.current) {
+      editInputRef.current.focus();
+    }
+  }, [editingSessionId]);
+
+  const startEditing = (session, e) => {
+    e.stopPropagation();
+    setEditingSessionId(session.session_id);
+    setEditTitle(session.title);
+  };
+
+  const saveTitle = async () => {
+    if (!editingSessionId) return;
+
+    // Only save if title changed and is not empty
+    if (editTitle.trim() !== "" && onRenameSession) {
+      await onRenameSession(editingSessionId, editTitle);
+    }
+    setEditingSessionId(null);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      saveTitle();
+    } else if (e.key === 'Escape') {
+      setEditingSessionId(null);
+    }
+  };
   const navigate = useNavigate();
 
   const showUpload = externalShowUpload !== undefined ? externalShowUpload : internalShowUpload;
@@ -129,12 +166,29 @@ export function ChatSidebar({
                 <div className="px-3 py-2.5 flex items-center justify-between">
                   <div className="flex-1 min-w-0 pr-2">
                     {/* Chat Title */}
-                    <p className={`text-sm truncate font-medium leading-tight ${currentSessionId === session.session_id
-                      ? 'font-semibold'
-                      : 'font-normal'
-                      }`}>
-                      {session.title}
-                    </p>
+                    {editingSessionId === session.session_id ? (
+                      <input
+                        ref={editInputRef}
+                        type="text"
+                        value={editTitle}
+                        onChange={(e) => setEditTitle(e.target.value)}
+                        onBlur={saveTitle}
+                        onKeyDown={handleKeyDown}
+                        onClick={(e) => e.stopPropagation()}
+                        className="w-full text-sm px-1 py-0.5 border border-orange-300 rounded focus:outline-none focus:ring-1 focus:ring-orange-500"
+                      />
+                    ) : (
+                      <p
+                        onDoubleClick={(e) => startEditing(session, e)}
+                        className={`text-sm truncate font-medium leading-tight ${currentSessionId === session.session_id
+                          ? 'font-semibold'
+                          : 'font-normal'
+                          }`}
+                        title="Double-click to rename"
+                      >
+                        {session.title}
+                      </p>
+                    )}
                   </div>
 
                   {/* Delete Button */}

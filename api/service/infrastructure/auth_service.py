@@ -85,6 +85,10 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     user = await user_service.get_user_by_id(user_id=token_data.user_id)
     if user is None:
         raise credentials_exception
+        
+    # Decrypt keys for internal use
+    decrypted_keys = await user_service.get_decrypted_api_keys(user_id=token_data.user_id)
+    user["api_keys"] = decrypted_keys
     
     return user
 

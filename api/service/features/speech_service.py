@@ -26,32 +26,28 @@ class SpeechService:
     """Service for handling speech recognition and synthesis using SarvamAI."""
     
     def __init__(self):
-        self.api_key: Optional[str] = os.getenv("SARVAM_API_KEY")
-        self.client = None
-        self._initialized = False
+        pass
     
-    def _ensure_initialized(self):
-        """Lazy initialization of SarvamAI client."""
-        if self._initialized:
-            return True
-        
-        if not self.api_key:
-            logger.error("SARVAM_API_KEY not found in environment variables")
-            return False
+    def _get_client(self, api_key: str = None):
+        """
+        Get a SarvamAI client instance.
+        Prioritizes the provided api_key, falls back to environment variable.
+        """
+        key = api_key or os.getenv("SARVAM_API_KEY")
+        if not key:
+            # logger.error("SARVAM_API_KEY not found in environment variables or user config")
+            return None
         
         try:
             from sarvamai import SarvamAI
-            self.client = SarvamAI(api_subscription_key=self.api_key)
-            self._initialized = True
-            logger.info("SarvamAI client initialized successfully")
-            return True
+            return SarvamAI(api_subscription_key=key)
         except ImportError:
             logger.error("sarvamai package not installed. Run: pip install sarvamai")
-            return False
+            return None
         except Exception as e:
             logger.error(f"Failed to initialize SarvamAI client: {e}")
-            return False
-    
+            return None
+
     def _split_text_into_chunks(self, text: str, max_size: int = MAX_CHUNK_SIZE) -> List[str]:
         """
         Split long text into smaller chunks based on sentence boundaries.
@@ -225,12 +221,13 @@ class SpeechService:
         logger.info(f"Stitched {len(audio_chunks)} audio chunks into {len(result)} bytes")
         return result
     
-    async def transcribe_audio(self, file) -> str:
+    async def transcribe_audio(self, file, api_key: str = None) -> str:
         """
         Transcribe audio file to text using SarvamAI ASR.
         
         Args:
             file: An uploaded audio file (UploadFile or file-like object)
+            api_key: Optional Sarvam API key
         
         Returns:
             str: The recognized/transcribed text
@@ -238,8 +235,9 @@ class SpeechService:
         Raises:
             Exception: If transcription fails
         """
-        if not self._ensure_initialized():
-            raise Exception("SarvamAI service not initialized. Check SARVAM_API_KEY.")
+        client = self._get_client(api_key)
+        if not client:
+            raise Exception("SarvamAI service not available. Check SARVAM_API_KEY.")
         
         try:
             filename = getattr(file, 'filename', 'recording.webm')
@@ -268,7 +266,7 @@ class SpeechService:
             logger.info(f"Using audio codec: {audio_codec}")
             
             # Call SarvamAI speech-to-text with bytes directly
-            response = self.client.speech_to_text.transcribe(
+            response = client.speech_to_text.transcribe(
                 file=content,
                 model="saarika:v2.5",
                 language_code="unknown",  # Let the API detect the language
@@ -292,6 +290,7 @@ class SpeechService:
     
     async def _convert_single_chunk(
         self,
+        client,
         text: str,
         target_language_code: str,
         speaker: str,
@@ -302,7 +301,7 @@ class SpeechService:
         enable_preprocessing: bool
     ) -> bytes:
         """Convert a single text chunk to speech."""
-        response = self.client.text_to_speech.convert(
+        response = client.text_to_speech.convert(
             text=text,
             target_language_code=target_language_code,
             speaker=speaker,
@@ -336,30 +335,16 @@ class SpeechService:
         pace: float = 1,
         loudness: float = 1,
         speech_sample_rate: int = 22050,
-        enable_preprocessing: bool = True
+        enable_preprocessing: bool = True,
+        api_key: str = None
     ) -> bytes:
         """
         Convert text to speech using SarvamAI TTS.
         Handles long text by splitting into chunks and stitching audio.
-        
-        Args:
-            text: The text to convert to speech
-            target_language_code: Language code (default: "en-IN")
-            speaker: Voice speaker name (default: "anushka")
-            pitch: Voice pitch adjustment (default: 0)
-            pace: Speech pace/speed (default: 1)
-            loudness: Audio loudness (default: 1)
-            speech_sample_rate: Audio sample rate (default: 22050)
-            enable_preprocessing: Enable text preprocessing (default: True)
-        
-        Returns:
-            bytes: The audio content as bytes (single stitched WAV file)
-        
-        Raises:
-            Exception: If text-to-speech conversion fails
         """
-        if not self._ensure_initialized():
-            raise Exception("SarvamAI service not initialized. Check SARVAM_API_KEY.")
+        client = self._get_client(api_key)
+        if not client:
+            raise Exception("SarvamAI service not available. Check SARVAM_API_KEY.")
         
         try:
             logger.info(f"Starting text-to-speech conversion for text ({len(text)} chars): {text[:50]}...")
@@ -370,6 +355,7 @@ class SpeechService:
             if len(chunks) == 1:
                 # Single chunk - direct conversion
                 audio_bytes = await self._convert_single_chunk(
+                    client=client,
                     text=chunks[0],
                     target_language_code=target_language_code,
                     speaker=speaker,
@@ -383,6 +369,7 @@ class SpeechService:
                 # Multiple chunks - convert each using async batch processing
                 logger.info(f"Converting {len(chunks)} text chunks to audio using async processing...")
                 audio_chunks = await self._convert_chunks_async(
+                    client=client,
                     chunks=chunks,
                     target_language_code=target_language_code,
                     speaker=speaker,
@@ -403,16 +390,9 @@ class SpeechService:
             logger.error(f"Error during text-to-speech conversion: {e}")
             raise Exception(f"Text-to-speech conversion failed: {str(e)}")
     
-    async def _convert_chunks_async(self, chunks: List[str], **kwargs) -> List[bytes]:
+    async def _convert_chunks_async(self, client, chunks: List[str], **kwargs) -> List[bytes]:
         """
         Convert multiple text chunks to audio using async batch processing for improved performance.
-        
-        Args:
-            chunks: List of text chunks to convert
-            **kwargs: TTS parameters (target_language_code, speaker, etc.)
-            
-        Returns:
-            List of audio bytes for each chunk
         """
         max_concurrent = 5  # Limit concurrent API calls to avoid rate limiting
         semaphore = asyncio.Semaphore(max_concurrent)
@@ -420,7 +400,7 @@ class SpeechService:
         async def convert_with_semaphore(i: int, chunk: str) -> bytes:
             async with semaphore:
                 logger.info(f"Converting chunk {i+1}/{len(chunks)}: {chunk[:30]}...")
-                return await self._convert_single_chunk(text=chunk, **kwargs)
+                return await self._convert_single_chunk(client=client, text=chunk, **kwargs)
         
         # Create tasks for all chunks
         tasks = [convert_with_semaphore(i, chunk) for i, chunk in enumerate(chunks)]
@@ -431,9 +411,9 @@ class SpeechService:
         logger.info(f"Successfully converted {len(audio_chunks)} chunks to audio")
         return audio_chunks
 
-    def is_available(self) -> bool:
+    def is_available(self, api_key: str = None) -> bool:
         """Check if the speech service is available and configured."""
-        return self._ensure_initialized()
+        return self._get_client(api_key) is not None
 
 
 # Singleton instance

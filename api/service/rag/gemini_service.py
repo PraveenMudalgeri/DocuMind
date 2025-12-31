@@ -25,7 +25,6 @@ logging.getLogger("google_genai.models").setLevel(logging.WARNING)
 
 class GeminiService:
     def __init__(self):
-        self.client = None
         # Safety settings to configure what content is blocked.
         self.safety_settings = [
             types.SafetySetting(
@@ -46,13 +45,28 @@ class GeminiService:
             ),
         ]
 
+    def _get_client(self, api_key: str = None):
+        """
+        Get a Gemini client instance. 
+        Prioritizes the provided api_key, falls back to settings.google_api_key.
+        """
+        key = api_key or settings.google_api_key
+        if not key:
+            logger.warning("No Google API key provided or found in settings.")
+            return None
+        return genai.Client(api_key=key)
 
-    async def generate_description(self, content: str, title: str = None) -> str:
+    async def generate_description(self, content: str, title: str = None, api_key: str = None) -> str:
         """
         Generates a short description or summary for a document using Gemini.
         """
         if not content or not isinstance(content, str):
             return "No description available."
+            
+        client = self._get_client(api_key)
+        if not client:
+             return "No description available (API Key missing)."
+
         prompt = (
             f"Summarize the following document in 1-2 sentences for a user-facing description. "
             f"Be concise and clear.\n\n"
@@ -60,68 +74,67 @@ class GeminiService:
             f"Content: {content[:2000]}"
         )
         try:
-            desc = await self.generate_answer(prompt)
-            return desc.strip()
+            # New SDK async generation
+            response = await client.aio.models.generate_content(
+                model=GENERATIVE_MODEL_NAME,
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    safety_settings=self.safety_settings
+                )
+            )
+            return response.text.strip()
         except Exception as e:
             logger.error(f"Failed to generate description: {e}")
             return "No description available."
             
-    async def generate_chat_title(self, query: str) -> str:
+    async def generate_chat_title(self, query: str, api_key: str = None) -> str:
         """
         Generates a simple, short title for a chat session based on the first query.
-        Uses simple keyword extraction for faster, more predictable titles.
         """
         if not query or not isinstance(query, str):
             return "New Chat"
-        
-        # Simple title generation without AI to make it faster and more predictable
-        query = query.strip().lower()
-        
-        # Common question patterns and their simple titles
-        if any(word in query for word in ['what', 'how', 'why', 'when', 'where', 'which']):
-            # Extract key topic words
-            words = query.split()
-            # Filter out common question words and short words
-            key_words = [w for w in words if len(w) > 3 and w not in ['what', 'how', 'why', 'when', 'where', 'which', 'does', 'will', 'can', 'should', 'would', 'could', 'the', 'and', 'for', 'with', 'about']]
             
-            if key_words:
-                # Take first 2-3 key words and capitalize
-                title_words = key_words[:2]
-                title = ' '.join(word.capitalize() for word in title_words)
-                return title if len(title) <= 20 else title[:17] + "..."
+        client = self._get_client(api_key)
+        if not client:
+            return "New Chat"
         
-        # For other queries, use first few words
-        words = query.split()[:3]
-        title = ' '.join(word.capitalize() for word in words)
-        
-        # Fallback to simple patterns
-        if len(title) > 25:
-            title = title[:22] + "..."
-        
-        return title if title else "New Chat"
+        # Use Gemini to generate a creative and concise title
+        prompt = (
+            f"Generate a very short, concise title (max 4-5 words) for a chat session that starts with this user query: "
+            f"'{query}'\n\n"
+            f"Title:"
+        )
+        try:
+            response = await client.aio.models.generate_content(
+                model=GENERATIVE_MODEL_NAME,
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    safety_settings=self.safety_settings
+                )
+            )
+            title = response.text
+            # Clean up the title (remove quotes, extra whitespace)
+            title = title.strip().strip('"').strip("'")
+            return title if len(title) <= 50 else title[:47] + "..."
+        except Exception as e:
+            logger.error(f"Failed to generate chat title: {e}")
+            return "New Chat"
         
     async def initialize_gemini(self):
-        """Initializes the Google Gen AI client."""
-        try:
-            logger.info("Initializing Google Gemini Service...")
-            # New SDK initialization
-            self.client = genai.Client(api_key=settings.google_api_key)
-            logger.info("Google Gemini service initialized successfully.")
-            return True
-        except Exception as e:
-            logger.error(f"Failed to initialize Gemini: {e}")
-            self.client = None
-            return False
+        """Deprecated: No longer needed with per-request clients."""
+        logger.info("Gemini Service initialized (stateless mode).")
+        return True
 
-    async def generate_answer(self, prompt: str) -> str:
+    async def generate_answer(self, prompt: str, api_key: str = None) -> str:
         """Generates a text response based on a prompt using an async call."""
-        if not self.client:
-            logger.error("Gemini client not initialized.")
-            return "Sorry, the generation service is not available."
+        client = self._get_client(api_key)
+        if not client:
+            logger.error("Gemini client could not be initialized (Missing Key).")
+            return "Sorry, the generation service is not available (Missing API Key)."
             
         try:
             # New SDK async generation
-            response = await self.client.aio.models.generate_content(
+            response = await client.aio.models.generate_content(
                 model=GENERATIVE_MODEL_NAME,
                 contents=prompt,
                 config=types.GenerateContentConfig(
@@ -132,8 +145,6 @@ class GeminiService:
         except Exception as e:
             logger.error(f"Failed to generate answer: {e}")
             return "Sorry, I couldn't generate an answer at this time."
-
-
 
 # Singleton instance
 gemini_service = GeminiService()

@@ -29,11 +29,11 @@ export function Header() {
             className="flex items-center gap-3 cursor-pointer group"
             onClick={() => navigate(isAuthenticated ? ROUTES.CHAT : ROUTES.HOME)}
           >
-            <div className="relative h-10 w-50 overflow-hidden flex items-center justify-center">
+            <div className="flex items-center gap-2">
               <img
                 src="/brand-logo.png"
-                alt="DocuMind Logo"
-                className="absolute min-w-[120px] min-h-[250px] object-contain scale-[1.2] contrast-[1.1] saturate-110"
+                alt="QueryWise Logo"
+                className="h-10 w-auto object-contain"
               />
             </div>
           </div>

@@ -26,6 +26,9 @@ class SpeechController:
             Dict containing the transcribed text
         """
         username = user.get('username', 'unknown')
+        api_keys = user.get('api_keys', {})
+        sarvam_key = api_keys.get('sarvam_api_key')
+
         logger.info(f"User '{username}' requested audio transcription for file: {file.filename}")
         
         # Validate file type
@@ -36,7 +39,7 @@ class SpeechController:
         
         try:
             # Call the speech service
-            transcribed_text = await speech_service.transcribe_audio(file)
+            transcribed_text = await speech_service.transcribe_audio(file, api_key=sarvam_key)
             
             logger.info(f"Transcription successful for user '{username}'")
             return {"text": transcribed_text}
@@ -62,6 +65,9 @@ class SpeechController:
             Audio bytes (stitched if text was chunked)
         """
         username = user.get('username', 'unknown')
+        api_keys = user.get('api_keys', {})
+        sarvam_key = api_keys.get('sarvam_api_key')
+        
         logger.info(f"User '{username}' requested text-to-speech for text of length {len(text)} chars")
         
         if not text or not text.strip():
@@ -76,7 +82,7 @@ class SpeechController:
         try:
             # Call the speech service with any additional parameters
             # The service will handle chunking for long text automatically
-            audio_bytes = await speech_service.text_to_speech(text, **kwargs)
+            audio_bytes = await speech_service.text_to_speech(text, api_key=sarvam_key, **kwargs)
             
             logger.info(f"Text-to-speech successful for user '{username}' ({len(audio_bytes)} bytes audio)")
             return audio_bytes
@@ -89,7 +95,11 @@ class SpeechController:
             )
     
     async def check_service_status(self) -> Dict[str, Any]:
-        """Check if the speech service is available."""
+        """
+        Check if the speech service is available.
+        Note: This checks availability relative to environment variables or global init.
+        User-specific availability depends on their provided keys.
+        """
         is_available = speech_service.is_available()
         return {
             "available": is_available,

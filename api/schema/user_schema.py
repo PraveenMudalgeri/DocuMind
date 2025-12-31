@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr, Field, validator
-from typing import Optional
+from typing import Optional, Dict, List
 from datetime import datetime
 
 class UserCreate(BaseModel):
@@ -31,6 +31,7 @@ class UserInDB(BaseModel):
     email: Optional[str] = None
     created_at: datetime
     is_active: bool = True
+    api_keys: Optional[Dict[str, str]] = {}  # Encrypted values
 
 class User(BaseModel):
     user_id: str
@@ -38,3 +39,8 @@ class User(BaseModel):
     email: Optional[str] = None
     created_at: datetime
     is_active: bool = True
+    # We don't return full api_keys here to avoid leaking them in standard calls
+    configured_providers: Optional[List[str]] = []
+
+class UserAPIKeysUpdate(BaseModel):
+    api_keys: Dict[str, str]  # Key: Provider (e.g. 'google', 'openai'), Value: API Key (Plaintext)

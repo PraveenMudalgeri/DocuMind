@@ -55,16 +55,16 @@ export function DocumentSelector({ selectedDocs, onSelectionChange }) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
           <span>Select Documents</span>
-          {selectedDocs.length > 0 && (
+          {selectedDocs.filter(id => documents.some(d => d.filename === id)).length > 0 && (
             <span className="bg-blue-100 text-blue-700 text-xs font-semibold px-2 py-0.5 rounded-full">
-              {selectedDocs.length}
+              {selectedDocs.filter(id => documents.some(d => d.filename === id)).length}
             </span>
           )}
         </span>
-        <svg 
+        <svg
           className={`w-4 h-4 text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-          fill="none" 
-          stroke="currentColor" 
+          fill="none"
+          stroke="currentColor"
           viewBox="0 0 24 24"
         >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -127,7 +127,7 @@ export function DocumentSelector({ selectedDocs, onSelectionChange }) {
                   Clear
                 </button>
               </div>
-              
+
               {filteredDocuments.length === 0 ? (
                 <div className="text-center py-4">
                   <p className="text-xs text-gray-500">No documents found</p>
@@ -135,32 +135,31 @@ export function DocumentSelector({ selectedDocs, onSelectionChange }) {
               ) : (
                 <div className="max-h-48 overflow-y-auto space-y-1 pt-1">
                   {filteredDocuments.map((doc) => (
-                  <label
-                    key={doc.filename}
-                    className={`flex items-center gap-2.5 px-2.5 py-2 rounded-md cursor-pointer transition-all ${
-                      selectedDocs.includes(doc.filename)
-                        ? 'bg-blue-50 border border-blue-200'
-                        : 'hover:bg-gray-50 border border-transparent'
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedDocs.includes(doc.filename)}
-                      onChange={() => toggleDocument(doc.filename)}
-                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-gray-900 truncate">{doc.title}</p>
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        <span className="inline-flex items-center gap-1">
-                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                          </svg>
-                          {doc.chunks} chunks
-                        </span>
-                      </p>
-                    </div>
-                  </label>
+                    <label
+                      key={doc.filename}
+                      className={`flex items-center gap-2.5 px-2.5 py-2 rounded-md cursor-pointer transition-all ${selectedDocs.includes(doc.filename)
+                          ? 'bg-blue-50 border border-blue-200'
+                          : 'hover:bg-gray-50 border border-transparent'
+                        }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedDocs.includes(doc.filename)}
+                        onChange={() => toggleDocument(doc.filename)}
+                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium text-gray-900 truncate">{doc.title}</p>
+                        <p className="text-xs text-gray-500 mt-0.5">
+                          <span className="inline-flex items-center gap-1">
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                            </svg>
+                            {doc.chunks} chunks
+                          </span>
+                        </p>
+                      </div>
+                    </label>
                   ))}
                 </div>
               )}
