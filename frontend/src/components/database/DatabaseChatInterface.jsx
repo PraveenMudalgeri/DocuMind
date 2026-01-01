@@ -181,7 +181,7 @@ export function DatabaseChatInterface({ activeConnection, onExecuteQuery }) {
             </div>
 
             {/* Input Area - Sticky at bottom */}
-            <div className="sticky bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-white via-white to-transparent px-4 md:px-8 pb-4 sm:pb-6 pt-8">
+            <div className="flex-shrink-0 bg-white px-4 md:px-8 pb-4 md:pb-6 pt-2 md:pt-4">
                 <div className="max-w-4xl mx-auto">
                     <div className="relative bg-white border border-gray-200 rounded-[26px] shadow-lg shadow-gray-100/50 hover:shadow-xl transition-all duration-300">
                         <form onSubmit={handleSubmit}>
@@ -193,7 +193,7 @@ export function DatabaseChatInterface({ activeConnection, onExecuteQuery }) {
                                     onChange={(e) => setQuery(e.target.value)}
                                     placeholder="Ask a question about your database..."
                                     disabled={isLoading}
-                                    className="w-full bg-transparent border-none focus:ring-0 focus:outline-none outline-none text-gray-800 placeholder-gray-400 resize-none text-[15px] leading-relaxed py-1 max-h-[150px] overflow-y-auto font-sans"
+                                    className="w-full bg-transparent border-none focus:ring-0 focus:outline-none outline-none text-gray-800 placeholder-gray-400 resize-none text-base md:text-[15px] leading-relaxed py-1 max-h-[150px] overflow-y-auto font-sans"
                                     style={{ minHeight: '44px' }}
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter' && !e.shiftKey) {
@@ -262,7 +262,7 @@ function MessageBubble({ message }) {
     }
 
     return (
-        <div className="w-full mb-10 group">
+        <div className="w-full mb-6 md:mb-10 group">
             <div className="flex gap-4 w-full">
                 {/* Assistant Icon (Database/System) */}
                 <div className="w-8 h-8 rounded-full bg-blue-50/50 flex items-center justify-center shrink-0 mt-0.5 border border-blue-100">

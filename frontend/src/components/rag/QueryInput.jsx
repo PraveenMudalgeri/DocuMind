@@ -240,7 +240,7 @@ export function QueryInput({ onSend, disabled, onExportChat, responseStyle = 'au
                         ${showModelMenu ? 'bg-blue-50 text-blue-700' : 'text-gray-500 hover:bg-gray-100'}
                       `}
                   >
-                    {getModelIcon(model)}
+                    {/* Icon removed as requested */}
                     <span className="hidden sm:inline truncate max-w-[80px]">
                       {getModelLabel(model)}
                     </span>
@@ -272,14 +272,7 @@ export function QueryInput({ onSend, disabled, onExportChat, responseStyle = 'au
                               : 'text-gray-600 hover:bg-gray-50'}
                             `}
                         >
-                          <div className={`
-                              p-1.5 rounded-lg
-                              ${model === item.id
-                              ? 'text-blue-600 bg-blue-100/50'
-                              : 'text-gray-400 bg-gray-50 group-hover:bg-blue-50'}
-                            `}>
-                            {getModelIcon(item.id)}
-                          </div>
+
                           <div className="flex flex-col items-start">
                             <span className="capitalize">{item.label}</span>
                             <span className="text-[10px] opacity-60 font-normal leading-tight">{item.desc}</span>

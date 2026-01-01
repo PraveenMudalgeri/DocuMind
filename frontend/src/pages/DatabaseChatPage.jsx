@@ -84,7 +84,7 @@ export function DatabaseChatPage() {
     const activeConnection = connections.find(conn => conn.id === activeConnectionId);
 
     return (
-        <div className="h-screen flex flex-col bg-white overflow-hidden">
+        <div className="h-dvh flex flex-col bg-white overflow-hidden">
             <Header />
 
             <div className="flex-1 flex overflow-hidden relative">

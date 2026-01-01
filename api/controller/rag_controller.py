@@ -31,7 +31,67 @@ class RAGController:
         return None
 
     async def delete_documents(self, filenames: list, user: Dict[str, Any]) -> Dict[str, Any]:
-    # ... (rest of delete_documents unchanged)
+        """
+        Deletes documents and their associated index data for a user.
+        """
+        username = user.get('username')
+        logger.info(f"User '{username}' requesting deletion of {len(filenames)} documents: {filenames}")
+        
+        try:
+            # Local imports to avoid circular dependencies
+            from service.rag.pinecone_service import pinecone_service
+            from service.rag.parent_chunks_service import parent_chunks_service
+
+            # 1. Get the documents to retrieve metadata (chunk_ids, parent_ids) before deletion
+            existing_docs = await user_documents_service.get_user_documents(username)
+            target_docs = [doc for doc in existing_docs if doc.get('filename') in filenames]
+            
+            if not target_docs:
+                logger.warning(f"No documents found for deletion matching: {filenames}")
+                return {"deleted": 0, "message": "No matching documents found."}
+            
+            # 2. Collect IDs
+            chunk_ids = []
+            parent_ids = []
+            for doc in target_docs:
+                chunk_ids.extend(doc.get('chunk_ids', []))
+                parent_ids.extend(doc.get('parent_ids', []))
+            
+            # 3. Delete from Vector Store (Pinecone)
+            # Delete child chunks by ID
+            vectors_deleted = 0
+            if chunk_ids:
+                vectors_deleted = await pinecone_service.delete_vectors_by_chunk_ids(chunk_ids)
+            
+            # Also delete by filter as a safety net
+            await pinecone_service.delete_vectors_by_filter({
+                "username": username,
+                "source_filename": {"$in": filenames}
+            })
+            
+            # 4. Delete Parent Chunks (MongoDB)
+            parents_deleted = 0
+            if parent_ids:
+                parents_deleted = await parent_chunks_service.delete_parent_chunks(parent_ids)
+                
+            # 5. Delete from User Documents Collection (MongoDB)
+            docs_deleted = await user_documents_service.delete_documents(username, filenames)
+            
+            logger.info(f"Deletion complete. Docs: {docs_deleted}, Vectors: {vectors_deleted}, Parents: {parents_deleted}")
+            
+            return {
+                "deleted_documents": docs_deleted,
+                "deleted_vectors": vectors_deleted, 
+                "deleted_parent_chunks": parents_deleted,
+                "message": f"Successfully deleted {docs_deleted} documents."
+            }
+            
+        except Exception as e:
+            logger.error(f"Error deleting documents for user '{username}': {e}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Failed to delete documents: {str(e)}",
+            )
 
     async def orchestrate_rag_flow(
         self, query_request: QueryRequest, user: Dict[str, Any], session_id: Optional[str] = None, documents: Optional[List[str]] = None
@@ -42,7 +102,7 @@ class RAGController:
         query = query_request.query
         top_k = query_request.top_k
         response_style = query_request.response_style or "auto"
-        retrieval_multiplier = query_request.retrieval_multiplier or 4
+        retrieval_multiplier = query_request.retrieval_multiplier or 2
         username = user.get('username')
         api_keys = user.get('api_keys', {})
         
@@ -60,7 +120,7 @@ class RAGController:
         logger.info(f"User '{username}' query: '{query[:50]}...' | style: '{response_style}' | top_k: {top_k} | multiplier: {retrieval_multiplier}")
         logger.info(f"Document filter: {documents} (type: {type(documents)})")
         
-        try:# If documents is an empty list, treat it as None (Search All) rather than "filter by nothing"
+        # If documents is an empty list, treat it as None (Search All) rather than "filter by nothing"
         if documents is not None and len(documents) == 0:
             documents = None
 
@@ -220,7 +280,6 @@ class RAGController:
             logger.info(f"Document '{file.filename}' already exists. Replacing it...")
             await self.delete_documents([file.filename], user)
 
-        # 2. Generate a description using Gemini
         # 2. Generate a description using Gemini or Groq
         from service.rag.gemini_service import gemini_service
         from service.rag.groq_service import groq_service

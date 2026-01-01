@@ -25,8 +25,8 @@ class RAGService:
         self.chunk_overlap = 100
         
         # Async processing configuration
-        self.max_concurrent_embeddings = 3  # Process up to 3 embeddings concurrently (Conservative for API limits)
-        self.batch_size = 20  # Process embeddings in batches
+        self.max_concurrent_embeddings = 10  # Process up to 10 embeddings concurrently (Increased for speed)
+        self.batch_size = 50  # Process embeddings in larger batches (Increased for speed)
 
     async def indexing_module(self, document: Dict[str, Any]) -> List[str]:
         """

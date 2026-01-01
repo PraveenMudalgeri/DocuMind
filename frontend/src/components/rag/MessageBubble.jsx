@@ -32,6 +32,21 @@ function stripMarkdown(text) {
   return cleaned.trim();
 }
 
+// Helper to fix broken/partial links (specifically LinkedIn as requested)
+function processContent(text) {
+  if (!text) return "";
+
+  // Fix /linkedin/in/... patterns to be clickable proper links
+  // We use a negative lookbehind-ish approach by checking we aren't inside a markdown link structure roughly
+  // simplified: just replace specific patterns if they appear as raw words
+  return text.replace(/(\/linkedin\/in\/[\w-]+)/g, (match) => {
+    // If it's already part of a link (e.g. ](/linkedin...), this simple regex might be aggressive
+    // But for the specific user request about "this kind of links" appearing in text, this is the fix.
+    const url = `https://www.linkedin.com${match}`;
+    return `[${match}](${url})`;
+  });
+}
+
 export function MessageBubble(props) {
   const { type, content, sources = [], query = "", onRegenerate } = props;
   const [showSources, setShowSources] = useState(false);
@@ -111,11 +126,11 @@ export function MessageBubble(props) {
               remarkPlugins={[remarkGfm]}
               components={{
                 a: ({ node, ...props }) => (
-                  <a {...props} target="_blank" rel="noopener noreferrer" />
+                  <a {...props} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline break-all" />
                 )
               }}
             >
-              {content}
+              {processContent(content)}
             </ReactMarkdown>
           </div>
 
