@@ -126,6 +126,10 @@ class RAGController:
         retrieval_multiplier = query_request.retrieval_multiplier or 4
         username = user.get('username')
         api_keys = user.get('api_keys', {})
+        
+        # Add model to api_keys context for service layer to use
+        api_keys['model'] = query_request.model
+        api_keys['groq_api_key'] = user.get('api_keys', {}).get('groq_api_key') or api_keys.get('groq_api_key')
 
         logger.info(f"User '{username}' query: '{query[:50]}...' | style: '{response_style}' | top_k: {top_k} | multiplier: {retrieval_multiplier}")
         logger.info(f"Document filter: {documents} (type: {type(documents)})")
@@ -256,8 +260,8 @@ class RAGController:
                 await chat_session_service.add_message(session_id, username, "user", query)
                 
                 # Check if we need to update title (first message heuristic done in service now or helper)
-                # Pass API key for title generation
-                await chat_session_service.update_session_title_if_needed(session_id, username, query, api_keys.get("google_api_key"))
+                # Pass API keys for title generation
+                await chat_session_service.update_session_title_if_needed(session_id, username, query, api_keys)
 
                 # Add assistant message with sources
                 sources_dict = [s.model_dump() for s in sources]
@@ -291,12 +295,23 @@ class RAGController:
             await self.delete_documents([file.filename], user)
 
         # 2. Generate a description using Gemini
+        # 2. Generate a description using Gemini or Groq
         from service.rag.gemini_service import gemini_service
-        description = await gemini_service.generate_description(
-            content=extracted_data["content"],
-            title=extracted_data["title"],
-            api_key=api_keys.get("google_api_key")
-        )
+        from service.rag.groq_service import groq_service
+        
+        groq_key = api_keys.get("groq_api_key")
+        if groq_key:
+             description = await groq_service.generate_description(
+                content=extracted_data["content"],
+                title=extracted_data["title"],
+                api_key=groq_key
+            )
+        else:
+            description = await gemini_service.generate_description(
+                content=extracted_data["content"],
+                title=extracted_data["title"],
+                api_key=api_keys.get("google_api_key")
+            )
 
         # 3. Create a DocumentPayload from the extracted content and description
         doc_payload = DocumentPayload(

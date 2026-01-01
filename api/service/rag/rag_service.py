@@ -1,5 +1,6 @@
 from typing import List, Dict, Any, Tuple
 from service.rag.gemini_service import gemini_service
+from service.rag.groq_service import groq_service
 from service.rag.embedding_service import embedding_service
 from service.rag.pinecone_service import pinecone_service
 from service.rag.parent_chunks_service import parent_chunks_service
@@ -96,8 +97,15 @@ class RAGService:
                 f"Please write a short, hypothetical passage that answers the following question. "
                 f"This passage will be used to retrieve relevant documents.\n\nQuestion: {query}"
             )
-            google_key = api_keys.get("google_api_key")
-            hypothetical_answer = await gemini_service.generate_answer(hyde_prompt, api_key=google_key)
+            model = api_keys.get("model", "gemini-2.5-flash")
+            
+            if "groq" in model.lower() or "llama" in model.lower():
+                groq_key = api_keys.get("groq_api_key")
+                hypothetical_answer = await groq_service.generate_answer(hyde_prompt, api_key=groq_key)
+            else:
+                google_key = api_keys.get("google_api_key")
+                hypothetical_answer = await gemini_service.generate_answer(hyde_prompt, api_key=google_key)
+                
             enhanced_query = f"{query}\n\n{hypothetical_answer}"
             logger.info(f"Generated hypothetical document for query: '{query}'")
             return enhanced_query # The embedding of this is used for retrieval
@@ -234,6 +242,12 @@ class RAGService:
             # Apply relevance scoring and filtering
             # Note: FlashRank provides normalized scores
             high_quality_chunks = []
+            
+            # Log the top scores to understand distribution
+            if reranked_chunks:
+                top_scores = [round(c.get('score', 0.0), 4) for c in reranked_chunks[:5]]
+                logger.info(f"Top rerank scores: {top_scores}")
+
             for chunk in reranked_chunks:
                 # Get the best available score
                 score = chunk.get('score', chunk.get('retrieval_score', 0.5))
@@ -248,6 +262,15 @@ class RAGService:
                     chunk['final_score'] = score
                     high_quality_chunks.append(chunk)
             
+            # CRITICAL FALLBACK: If we have NO high quality chunks, but we did find *something*,
+            # we should return the top chunks rather than nothing, especially if retrieval found them.
+            # This handles cases where the reranker is strict or uncalibrated.
+            if not high_quality_chunks and reranked_chunks:
+                logger.warning(f"No chunks met the threshold {min_relevance_score}. Returning top {min(3, len(reranked_chunks))} chunks as fallback.")
+                high_quality_chunks = reranked_chunks[:min(3, len(reranked_chunks))]
+                for chunk in high_quality_chunks:
+                     chunk['final_score'] = chunk.get('score', 0.0)
+
             # Ensure we have enough context - if filtering was too aggressive, add more
             # But only if they have a modicum of relevance
             if len(high_quality_chunks) < min(3, len(reranked_chunks)):
@@ -255,7 +278,7 @@ class RAGService:
                     if chunk not in high_quality_chunks:
                         # Hard floor check
                         score = chunk.get('score', 0.0)
-                        if score > 0.15: 
+                        if score > 0.01:  # Very low floor just to filter complete garbage
                             chunk['final_score'] = score
                             high_quality_chunks.append(chunk)
                             if len(high_quality_chunks) >= 3:
@@ -292,6 +315,8 @@ class RAGService:
             api_keys: Dictionary containing user-specific API keys
         """
         try:
+            model = api_keys.get("model", "gemini-2.5-flash")
+            logger.info(f"Using model: {model} for generation")
             # Build context from chunks - include ALL retrieved content
             context_parts = [chunk.get("metadata", {}).get("content", "") for chunk in context_chunks]
             context = "\n\n---\n\n".join(context_parts)
@@ -322,34 +347,38 @@ class RAGService:
             history_header = f"PREVIOUS CONVERSATION:\n{conversation_context}\n\n" if conversation_context else ""
             
             prompt = f"""
-You are a helpful, expert assistant. Answer the user's question in a clear, natural, and conversational style, just like Claude or ChatGPT. Use well-formatted Markdown for your response.
+You are an expert assistant. Your goal is to provide a comprehensive, well-structured answer in a natural, professional voice.
 
-RESPONSE GUIDELINES:
-- **STYLE**: Auto-detect the user's desired detail level (concise vs detailed) from their query and adapt accordingly. If unsure, default to a balanced, helpful explanation.
-- Write as if you are having a friendly, professional conversation.
-- Use natural, flowing language and organize information logically.
-- Structure your answer with:
-    - **Bold** for key terms and important concepts
-    - Bullet points (-) or numbered lists for multiple items
-    - Headings (##) to organize sections if needed
-    - `Code blocks` for technical terms, code, or commands
-    - Italics for emphasis
-- Use multiple paragraphs for clarity and readability.
-- **DOCUMENT CONTEXT**: Use the provided "AVAILABLE INFORMATION" (specific chunks) and "DOCUMENT OVERVIEW" (general summaries) to answer.
-- If specific chunks are missing but the "DOCUMENT OVERVIEW" is relevant, mention what the documents seem to cover generally.
-- If the context doesn't contain the answer, say: "I don't have information about that specific aspect in the provided documents."
-- Do not speculate or add information beyond what's provided.
+### Guidelines:
+1.  **Structure is Key**: Use Markdown headers (###) to organize your response into logical sections (e.g., "Overview", "Key Details", "Analysis").
+2.  **Rich Formatting**: 
+    - Use **Tables** to compare data or list properties.
+    - Use `Code Blocks` for technical terms, commands, or code.
+    - Use **Bold** for emphasis on important concepts.
+    - Use > Blockquotes for summaries or key takeaways.
+3.  **Be Direct**: Start with a direct answer to the question.
+4.  **Natural Flow**: Use fluid transitions between paragraphs.
+5.  **Context Use**: Base your answer STRICTLY on the "Available Information" below.
+6.  **Tone**: Professional, confident, and helpful.
 
-{history_header}{doc_overview}AVAILABLE INFORMATION:
+### Context:
+{history_header}{doc_overview}
+
+### Available Information:
 {context}
 
-QUESTION: {query}
+### User Question:
+{query}
 
-Provide your answer below in Markdown, as if you are Claude or ChatGPT. Do not mention that you are an AI or reference the source documents. Present the information naturally and helpfully.
+Answer:
 """
             
-            google_key = api_keys.get("google_api_key")
-            answer = await gemini_service.generate_answer(prompt, api_key=google_key)
+            if "groq" in model.lower() or "llama" in model.lower():
+                groq_key = api_keys.get("groq_api_key")
+                answer = await groq_service.generate_answer(prompt, api_key=groq_key)
+            else:
+                google_key = api_keys.get("google_api_key")
+                answer = await gemini_service.generate_answer(prompt, api_key=google_key)
             
             # Keep the markdown formatting - don't strip it
             logger.info(f"Generated markdown answer for query: {query[:50]}... (length: {len(answer)} chars)")

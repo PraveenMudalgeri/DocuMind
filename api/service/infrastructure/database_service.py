@@ -16,7 +16,7 @@ class DatabaseService:
     async def connect(self):
         """Connect to MongoDB."""
         try:
-            logger.info(f"Connecting to MongoDB at {self.db_url}...")
+            logger.info(f"Connecting to MongoDB at {self.db_url.split('@')[-1] if '@' in self.db_url else 'localhost'}...")
             # Set a 5-second timeout for server selection to avoid hanging cold starts
             self.client = AsyncIOMotorClient(self.db_url, serverSelectionTimeoutMS=5000)
             self.db = self.client[self.db_name]
@@ -50,7 +50,7 @@ class DatabaseService:
             # Parent Chunks - Index by id
             await self.db.parent_chunks.create_index("id", unique=True)
             
-            logger.info("MongoDB indexes verified/created.")
+
         except Exception as e:
             logger.error(f"Error creating indexes: {e}")
 

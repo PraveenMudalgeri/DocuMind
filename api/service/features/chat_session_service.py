@@ -101,7 +101,7 @@ class ChatSessionService:
             logger.error(f"Error adding message to {session_id}: {e}")
             return False
             
-    async def update_session_title_if_needed(self, session_id: str, username: str, content: str, api_key: str = None):
+    async def update_session_title_if_needed(self, session_id: str, username: str, content: str, api_keys: Dict[str, str] = {}):
         """Helper to update title if it's currently 'New Chat'."""
         try:
             collection = await self.get_collection()
@@ -109,8 +109,15 @@ class ChatSessionService:
             
             if session and session.get("title") == "New Chat":
                 from service.rag.gemini_service import gemini_service
-                # await gemini_service.initialize_gemini() # Deprecated
-                new_title = await gemini_service.generate_chat_title(content, api_key=api_key)
+                from service.rag.groq_service import groq_service
+                
+                groq_key = api_keys.get("groq_api_key") if isinstance(api_keys, dict) else None
+                google_key = api_keys.get("google_api_key") if isinstance(api_keys, dict) else api_keys
+                
+                if groq_key:
+                    new_title = await groq_service.generate_chat_title(content, api_key=groq_key)
+                else:
+                    new_title = await gemini_service.generate_chat_title(content, api_key=google_key)
                 
                 if new_title and new_title != "New Chat":
                     await collection.update_one(

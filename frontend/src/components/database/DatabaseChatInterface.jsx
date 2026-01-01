@@ -123,31 +123,22 @@ export function DatabaseChatInterface({ activeConnection, onExecuteQuery }) {
                             Connected to: <span className="font-medium">{activeConnection.databaseType}</span>
                         </p>
                     </div>
-                    <div className="flex items-center gap-3">
-                        <button
-                            onClick={() => setMessages([])}
-                            className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors flex items-center gap-2"
-                            title="Clear chat history"
-                        >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                            Clear Chat
-                        </button>
-                        <div className="flex items-center gap-2">
-                            <div className={`w-2 h-2 rounded-full ${activeConnection.status === 'connected' ? 'bg-green-500' : 'bg-red-500'
-                                }`}></div>
-                            <span className="text-xs text-gray-600">
-                                {activeConnection.status === 'connected' ? 'Connected' : 'Disconnected'}
-                            </span>
-                        </div>
-                    </div>
+                    <button
+                        onClick={() => setMessages([])}
+                        className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors flex items-center gap-2"
+                        title="Clear chat history"
+                    >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Clear Chat
+                    </button>
                 </div>
             </div>
 
             {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto px-4 md:px-8 py-4 pt-6 md:pt-4 pb-32">
-                <div className="max-w-4xl mx-auto space-y-6">
+            <div className="flex-1 overflow-y-auto px-4 md:px-8 py-4 pt-6 md:pt-4 pb-4">
+                <div className="max-w-4xl mx-auto space-y-6 mb-4">
                     {messages.length === 0 ? (
                         <div className="flex flex-col items-center justify-center h-full text-center py-12">
                             <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-6">
@@ -189,8 +180,8 @@ export function DatabaseChatInterface({ activeConnection, onExecuteQuery }) {
                 </div>
             </div>
 
-            {/* Input Area - Fixed relative to viewport */}
-            <div className="fixed bottom-0 left-0 right-0 z-20 bg-linear-to-t from-white via-white to-transparent px-4 md:px-6 lg:px-8 pb-4 sm:pb-6 pt-10">
+            {/* Input Area - Sticky at bottom */}
+            <div className="sticky bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-white via-white to-transparent px-4 md:px-8 pb-4 sm:pb-6 pt-8">
                 <div className="max-w-4xl mx-auto">
                     <div className="relative bg-white border border-gray-200 rounded-[26px] shadow-lg shadow-gray-100/50 hover:shadow-xl transition-all duration-300">
                         <form onSubmit={handleSubmit}>

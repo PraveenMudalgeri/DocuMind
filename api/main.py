@@ -36,21 +36,19 @@ async def lifespan(app: FastAPI):
 
     # Initialize Pinecone
     try:
-        if pinecone_service.initialize():
-            logger.info("Initialized Pinecone connection.")
-        else:
+        if not pinecone_service.initialize():
             logger.warning("Pinecone initialization returned false. Check configuration.")
     except Exception as e:
         logger.error(f"Failed to initialize Pinecone: {e}")
 
     # Initialize Gemini
     try:
-        if await gemini_service.initialize_gemini():
-            logger.info("Initialized Gemini service.")
-        else:
+        if not await gemini_service.initialize_gemini():
             logger.warning("Gemini initialization returned false.")
     except Exception as e:
         logger.error(f"Failed to initialize Gemini: {e}")
+
+    logger.info("Initialized Groq service.")
 
     yield  # Application is running
 

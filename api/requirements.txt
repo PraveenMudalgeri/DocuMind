@@ -24,3 +24,4 @@ bs4>=0.0.2
 sarvamai>=0.1.22
 fastembed>=0.2.0
 flashrank>=0.2.0
+groq>=0.5.0

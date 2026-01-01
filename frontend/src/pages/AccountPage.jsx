@@ -17,7 +17,8 @@ export function AccountPage() {
     // API Key State
     const [apiKeys, setApiKeys] = useState({
         google_api_key: "",
-        sarvam_api_key: ""
+        sarvam_api_key: "",
+        groq_api_key: ""
     });
     const [configuredProviders, setConfiguredProviders] = useState([]);
     const [isSavingKeys, setIsSavingKeys] = useState(false);
@@ -69,7 +70,7 @@ export function AccountPage() {
         try {
             await authService.updateApiKeys(keysToUpdate);
             showToast({ type: "success", message: "API keys updated successfully" });
-            setApiKeys({ google_api_key: "", sarvam_api_key: "" });
+            setApiKeys({ google_api_key: "", sarvam_api_key: "", groq_api_key: "" });
             const userData = await authService.getCurrentUser();
             if (userData?.user?.configured_providers) {
                 setConfiguredProviders(userData.user.configured_providers);
@@ -257,6 +258,22 @@ export function AccountPage() {
                                         className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-sm font-mono placeholder:text-gray-300"
                                     />
                                     <p className="text-xs text-gray-400 mt-1.5">Required for advanced reasoning and content generation.</p>
+                                </div>
+
+                                {/* Groq */}
+                                <div>
+                                    <div className="flex justify-between items-center mb-1.5">
+                                        <label className="block text-sm font-medium text-gray-700">Groq API Key</label>
+                                        {getKeyStatus("groq_api_key")}
+                                    </div>
+                                    <input
+                                        type="password"
+                                        placeholder={configuredProviders.includes("groq_api_key") ? "••••••••••••••••••••••••" : "Enter API Key"}
+                                        value={apiKeys.groq_api_key}
+                                        onChange={(e) => handleApiKeyChange("groq_api_key", e.target.value)}
+                                        className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-sm font-mono placeholder:text-gray-300"
+                                    />
+                                    <p className="text-xs text-gray-400 mt-1.5">Required for ultra-fast Llama inference.</p>
                                 </div>
 
                                 {/* Sarvam */}

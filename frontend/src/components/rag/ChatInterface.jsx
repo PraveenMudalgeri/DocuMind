@@ -25,6 +25,7 @@ export function ChatInterface({
   const { showToast } = useToast();
   const { user } = useAuth();
   const [showDocDropdown, setShowDocDropdown] = useState(false);
+  const [selectedModel, setSelectedModel] = useState('gemini-2.5-flash');
 
   // Filter selected documents against available documents to handle deletions and get titles
   const validDocs = availableDocuments.filter(doc => selectedDocuments.includes(doc.filename));
@@ -71,7 +72,7 @@ export function ChatInterface({
 
     try {
       // Use validDocs.map(d => d.filename) to only send existing documents
-      const response = await ragService.query(query, 5, activeSession.session_id, validDocs.map(d => d.filename), responseStyle);
+      const response = await ragService.query(query, 5, activeSession.session_id, validDocs.map(d => d.filename), responseStyle, selectedModel);
       if (!response || !response.answer) throw new Error("Invalid response from server");
 
       const assistantMessage = {
@@ -109,7 +110,7 @@ export function ChatInterface({
     setIsLoading(true);
 
     try {
-      const response = await ragService.query(query, 5, session.session_id, validDocs.map(d => d.filename), responseStyle);
+      const response = await ragService.query(query, 5, session.session_id, validDocs.map(d => d.filename), responseStyle, selectedModel);
       if (!response || !response.answer) throw new Error("Invalid response from server");
 
       const assistantMessage = {
@@ -260,6 +261,8 @@ export function ChatInterface({
                 onResponseStyleChange={setResponseStyle}
                 onAttachClick={onAttachDocuments}
                 showDisclaimer={false}
+                model={selectedModel}
+                onModelChange={setSelectedModel}
               />
             </div>
 
@@ -309,6 +312,8 @@ export function ChatInterface({
               responseStyle={responseStyle}
               onResponseStyleChange={setResponseStyle}
               onAttachClick={onAttachDocuments}
+              model={selectedModel}
+              onModelChange={setSelectedModel}
             />
           </div>
         </div>
