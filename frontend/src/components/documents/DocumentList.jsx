@@ -117,7 +117,7 @@ export function DocumentList({ documents, onDocumentsChanged, isSelectionMode, o
               className={`transition-all relative ${isSelected ? 'ring-2 ring-orange-500 border-orange-200 bg-orange-50' : 'cursor-pointer hover:border-orange-200'}`}
               onClick={() => handleDocumentClick(index)}
             >
-              <div className="flex items-start gap-4">
+              <div className="flex items-start gap-3 md:gap-4">
                 {isSelectionMode && (
                   <div className="pt-2">
                     <input
@@ -135,23 +135,23 @@ export function DocumentList({ documents, onDocumentsChanged, isSelectionMode, o
                   </svg>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between">
-                    <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-1 truncate pr-4">
+                  <div className="flex items-start justify-between gap-2 flex-wrap">
+                    <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-1 truncate min-w-0 max-w-full">
                       {doc.title || 'Untitled Document'}
                     </h3>
                     {!isSelectionMode && (
-                      <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
+                      <span className="px-2.5 py-0.5 bg-green-100 text-green-700 text-xs font-medium rounded-full shrink-0">
                         Indexed
                       </span>
                     )}
                   </div>
-                  <div className="flex items-center gap-4 text-sm text-gray-600 mb-2">
+                  <div className="flex items-center gap-2 md:gap-4 text-sm text-gray-600 mb-2 flex-wrap">
                     {doc.filename && (
-                      <span className="flex items-center gap-1">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <span className="flex items-center gap-1 min-w-0 max-w-full">
+                        <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                         </svg>
-                        {doc.filename}
+                        <span className="truncate">{doc.filename}</span>
                       </span>
                     )}
                     {doc.chunks && (

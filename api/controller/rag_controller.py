@@ -247,13 +247,8 @@ class RAGController:
                         score=1.0
                     ))
             
-            # Append sources to the final answer for visibility in chat
-            if sources:
-                final_answer += "\n\n**Sources:**\n"
-                for i, source in enumerate(sources, 1):
-                    # Clean up title
-                    title = source.title or "Untitled Document"
-                    final_answer += f"{i}. {title}\n"
+            # Skip appending sources to the final answer for visibility in chat
+
 
             # Save to chat session if session_id provided
             if session_id:

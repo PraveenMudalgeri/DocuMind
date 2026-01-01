@@ -114,8 +114,8 @@ export function Header() {
                     onClick={() => setShowMenu(!showMenu)}
                     className="flex items-center gap-3 px-3 py-2 hover:bg-gray-50 rounded-lg transition-all"
                   >
-                    <div className="w-9 h-9 rounded-full bg-linear-to-br from-orange-400 to-orange-600 flex items-center justify-center shadow-sm">
-                      <span className="text-white font-semibold text-sm">
+                    <div className="w-9 h-9 rounded-full bg-orange-50 flex items-center justify-center">
+                      <span className="text-orange-600 font-semibold text-sm">
                         {user?.username?.[0]?.toUpperCase() || "U"}
                       </span>
                     </div>
@@ -237,8 +237,8 @@ export function Header() {
                 <>
                   {/* User Info */}
                   <div className="flex items-center gap-3 pb-3 border-b border-gray-200">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center shadow-sm">
-                      <span className="text-white font-semibold">
+                    <div className="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center">
+                      <span className="text-orange-600 font-semibold">
                         {user?.username?.[0]?.toUpperCase() || "U"}
                       </span>
                     </div>

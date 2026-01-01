@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { chatService } from '../services/chatService';
 import { useToast } from './useToast';
 
 export function useChatSessions() {
   const [sessions, setSessions] = useState([]);
+  const [searchParams, setSearchParams] = useSearchParams();
   const [currentSessionId, setCurrentSessionId] = useState(null);
   const [currentSession, setCurrentSession] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -97,12 +99,22 @@ export function useChatSessions() {
         const mostRecentEmpty = sessionsList.length > 0 &&
           (!sessionsList[0].messages || sessionsList[0].messages.length === 0);
 
-        if (mostRecentEmpty) {
-          // Reuse the existing empty chat
+        // Priority 1: URL param
+        const urlSessionId = searchParams.get('session_id');
+        if (urlSessionId) {
+          // Verify it exists in the fetched sessions to avoid invalid IDs
+          const exists = sessionsList.find(s => s.session_id === urlSessionId);
+          if (exists) {
+            setCurrentSessionId(urlSessionId);
+            return;
+          }
+        }
+
+        // Priority 2: Reuse empty session
+        // Default to the most recent session if available
+        if (sessionsList.length > 0) {
           setCurrentSessionId(sessionsList[0].session_id);
         } else {
-          // Do not create a new session automatically. 
-          // Just set currentSessionId to null so the specific "New Chat" UI is shown.
           setCurrentSessionId(null);
         }
       } catch (error) {
@@ -112,10 +124,19 @@ export function useChatSessions() {
     initializeSessions();
   }, []);
 
-  // Load current session when ID changes
+  // Sync URL when currentSessionId changes
   useEffect(() => {
     if (currentSessionId) {
+      setSearchParams({ session_id: currentSessionId }, { replace: true });
       loadSession(currentSessionId);
+    } else {
+      // If explicitly null (New Chat), maybe clear param?
+      // But be careful not to loop if we cleared it.
+      // For now, let's only clear if we are sure. 
+      // If we just loaded and it's null, we want to clear.
+      if (searchParams.get('session_id')) {
+        setSearchParams({}, { replace: true });
+      }
     }
   }, [currentSessionId]);
 

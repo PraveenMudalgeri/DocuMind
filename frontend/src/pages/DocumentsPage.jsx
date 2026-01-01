@@ -16,67 +16,71 @@ export function DocumentsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      <Container maxWidth="xl" className="py-12">
-        <div className="mb-6 md:mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-semibold text-gray-900 mb-1 md:mb-2">Upload Documents</h1>
-            <p className="text-sm md:text-base text-gray-600">Upload and manage your documents for intelligent querying</p>
-          </div>
-          <Button
-            variant="secondary"
-            onClick={() => navigate(ROUTES.DOCUMENTS_LIST)}
-            className="w-full sm:w-auto whitespace-nowrap"
-            size="sm"
-          >
-            <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            View All Documents
-          </Button>
-        </div>
-
-        <div className="grid lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2">
-            <Card>
-              <DocumentUpload onUploadSuccess={handleUploadSuccess} />
-            </Card>
+    <div className="h-screen-safe flex flex-col bg-gray-50 overflow-hidden">
+      <div className="shrink-0">
+        <Header />
+      </div>
+      <div className="flex-1 overflow-y-auto">
+        <Container maxWidth="xl" className="py-12">
+          <div className="mb-6 md:mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-semibold text-gray-900 mb-1 md:mb-2">Upload Documents</h1>
+              <p className="text-sm md:text-base text-gray-600">Upload and manage your documents for intelligent querying</p>
+            </div>
+            <Button
+              variant="secondary"
+              onClick={() => navigate(ROUTES.DOCUMENTS_LIST)}
+              className="w-full sm:w-auto whitespace-nowrap"
+              size="sm"
+            >
+              <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              View All Documents
+            </Button>
           </div>
 
-          <div>
-            <Card>
-              <h3 className="font-semibold text-gray-900 mb-4">Quick Tips</h3>
-              <ul className="space-y-3 text-sm text-gray-600">
-                <li className="flex gap-2">
-                  <svg className="w-5 h-5 text-orange-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  Upload multiple documents for comprehensive knowledge base
-                </li>
-                <li className="flex gap-2">
-                  <svg className="w-5 h-5 text-orange-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  Supported formats: PDF, DOCX, HTML, Markdown, TXT
-                </li>
-                <li className="flex gap-2">
-                  <svg className="w-5 h-5 text-orange-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  Documents are automatically indexed for fast retrieval
-                </li>
-                <li className="flex gap-2">
-                  <svg className="w-5 h-5 text-orange-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  Maximum file size: 10MB per document
-                </li>
-              </ul>
-            </Card>
+          <div className="grid lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2">
+              <Card>
+                <DocumentUpload onUploadSuccess={handleUploadSuccess} />
+              </Card>
+            </div>
+
+            <div>
+              <Card>
+                <h3 className="font-semibold text-gray-900 mb-4">Quick Tips</h3>
+                <ul className="space-y-3 text-sm text-gray-600">
+                  <li className="flex gap-2">
+                    <svg className="w-5 h-5 text-orange-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Upload multiple documents for comprehensive knowledge base
+                  </li>
+                  <li className="flex gap-2">
+                    <svg className="w-5 h-5 text-orange-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Supported formats: PDF, DOCX, HTML, Markdown, TXT
+                  </li>
+                  <li className="flex gap-2">
+                    <svg className="w-5 h-5 text-orange-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Documents are automatically indexed for fast retrieval
+                  </li>
+                  <li className="flex gap-2">
+                    <svg className="w-5 h-5 text-orange-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Maximum file size: 10MB per document
+                  </li>
+                </ul>
+              </Card>
+            </div>
           </div>
-        </div>
-      </Container>
+        </Container>
+      </div>
     </div>
   );
 }

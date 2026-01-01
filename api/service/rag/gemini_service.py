@@ -8,6 +8,7 @@ from datetime import datetime
 import google.genai as genai
 from google.genai import types
 from google.genai.types import HarmCategory, HarmBlockThreshold
+from service.monitoring.usage_tracker import usage_tracker
 
 logger = logging.getLogger(__name__)
 
@@ -75,6 +76,7 @@ class GeminiService:
         )
         try:
             # New SDK async generation
+            usage_tracker.increment()
             response = await client.aio.models.generate_content(
                 model=GENERATIVE_MODEL_NAME,
                 contents=prompt,
@@ -105,6 +107,7 @@ class GeminiService:
             f"Title:"
         )
         try:
+            usage_tracker.increment()
             response = await client.aio.models.generate_content(
                 model=GENERATIVE_MODEL_NAME,
                 contents=prompt,
@@ -134,6 +137,7 @@ class GeminiService:
             
         try:
             # New SDK async generation
+            usage_tracker.increment()
             response = await client.aio.models.generate_content(
                 model=GENERATIVE_MODEL_NAME,
                 contents=prompt,

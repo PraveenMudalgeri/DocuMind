@@ -9,6 +9,9 @@ from fastapi import UploadFile, HTTPException, status
 from pypdf import PdfReader
 import logging
 
+import logging
+import re
+
 logger = logging.getLogger(__name__)
 
 class FileProcessingService:
@@ -52,6 +55,12 @@ class FileProcessingService:
                 detail=f"Failed to process file: {filename}. Error: {str(e)}",
             )
 
+    def _resolve_pdf_object(self, obj):
+        """Resolves indirect objects to their actual value."""
+        if hasattr(obj, "get_object"):
+            return obj.get_object()
+        return obj
+
     def _extract_from_pdf(self, contents: bytes) -> str:
         """Extracts text from PDF file contents, including embedded links."""
         with io.BytesIO(contents) as pdf_file:
@@ -65,16 +74,33 @@ class FileProcessingService:
                 links = []
                 if "/Annots" in page:
                     for annot in page["/Annots"]:
-                        obj = annot.get_object()
-                        if "/A" in obj and "/URI" in obj["/A"]:
-                            uri = obj["/A"]["/URI"]
-                            links.append(uri)
+                        try:
+                            annot_obj = self._resolve_pdf_object(annot)
+                            
+                            # Ensure it's a Link annotation
+                            if annot_obj.get("/Subtype") == "/Link":
+                                # Check for Action (URL)
+                                if "/A" in annot_obj:
+                                    action = self._resolve_pdf_object(annot_obj["/A"])
+                                    if "/URI" in action:
+                                        links.append(action["/URI"])
+                        except Exception as e:
+                            logger.warning(f"Failed to process annotation: {e}")
+                            continue
                 
                 # Append links to the bottom of the page text if found
                 if links:
-                    text += "\n\n**Links found on this page:**\n"
-                    for link in set(links): # Deduplicate
-                        text += f"- {link}\n"
+                    # Filter out non-string links and deduplicate
+                    valid_links = {link for link in links if isinstance(link, str)}
+                    
+                    # Regex fallback: Find links in plain text that might not have annotations
+                    text_links = set(re.findall(r'https?://[^\s<>"]+|www\.[^\s<>"]+', text))
+                    valid_links.update(text_links)
+                    
+                    if valid_links:
+                        text += "\n\n**Links found on this page:**\n"
+                        for link in valid_links:
+                            text += f"- [{link}]({link})\n"
                 
                 full_text.append(text)
                 

@@ -86,7 +86,7 @@ export function ChatSidebar({
       )}
 
       {/* Header */}
-      <div className="p-4 border-b border-gray-200" style={{ background: 'linear-gradient(to bottom, rgb(249 250 251), white)' }}>
+      <div className="h-[73px] p-4 border-b border-gray-200 flex items-center" style={{ background: 'linear-gradient(to bottom, rgb(249 250 251), white)' }}>
         <Button
           onClick={onNewSession}
           className="w-full justify-center shadow-sm hover:shadow-md transition-shadow"

@@ -11,7 +11,7 @@ export function RightSidebar({ sessionId, onClose }) {
     >
       {/* Header - Notes Toggle */}
       <div
-        className="p-4 border-b border-gray-200"
+        className="h-[73px] p-4 border-b border-gray-200 flex flex-col justify-center"
         style={{ background: "linear-gradient(to bottom, rgb(249 250 251), white)" }}
       >
         <div className="flex items-center justify-between">

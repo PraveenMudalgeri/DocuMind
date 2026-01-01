@@ -136,7 +136,7 @@ export function ChatInterface({
   return (
     <div className="flex flex-col h-full relative">
       {/* Desktop Header - Export & Delete Actions */}
-      <div className="hidden md:flex items-center justify-between px-8 py-4 bg-white/80 backdrop-blur-md border-b border-gray-100 z-30 sticky top-0">
+      <div className="h-[73px] hidden md:flex items-center justify-between px-8 bg-white/80 backdrop-blur-md border-b border-gray-100 z-30 sticky top-0">
         <div className="flex-1 min-w-0">
           <h1 className="text-lg font-semibold text-gray-800 truncate">
             {session?.title || "New Chat"}
@@ -232,7 +232,7 @@ export function ChatInterface({
       </div>
 
       {/* Messages Area - Increased bottom padding to prevent overlap with fixed input */}
-      <div className="flex-1 overflow-y-auto px-4 md:px-6 lg:px-8 py-4 pt-6 md:pt-4 pb-48 scroll-smooth relative">
+      <div className="flex-1 overflow-y-auto px-4 md:px-6 lg:px-8 py-4 pt-24 md:pt-4 pb-48 scroll-smooth relative">
         {!session ? (
           <div className="flex flex-col items-center justify-center h-full text-center">
             <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mb-4">

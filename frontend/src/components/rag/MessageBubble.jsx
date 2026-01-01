@@ -107,14 +107,21 @@ export function MessageBubble(props) {
         <div className="flex-1 min-w-0">
           {/* Render markdown content with custom styling */}
           <div className="prose max-w-none prose-headings:text-gray-900 prose-headings:font-semibold prose-p:text-gray-900 prose-p:leading-relaxed prose-strong:text-gray-900 prose-strong:font-semibold prose-code:text-orange-600 prose-code:bg-orange-50 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-pre:bg-gray-50 prose-pre:border prose-pre:border-gray-200 prose-ul:text-gray-900 prose-ol:text-gray-900 prose-li:text-gray-900">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={{
+                a: ({ node, ...props }) => (
+                  <a {...props} target="_blank" rel="noopener noreferrer" />
+                )
+              }}
+            >
               {content}
             </ReactMarkdown>
           </div>
 
           <div className="mt-3 pt-3 border-t border-gray-100">
             {/* Actions */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
               {/* Copy Button */}
               <button
                 onClick={handleCopyText}

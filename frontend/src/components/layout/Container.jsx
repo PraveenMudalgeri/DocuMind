@@ -8,7 +8,7 @@ export function Container({ children, maxWidth = 'lg', className = '' }) {
   };
 
   return (
-    <div className={`${widths[maxWidth]} mx-auto px-6 ${className}`}>
+    <div className={`${widths[maxWidth]} mx-auto px-4 md:px-6 ${className}`}>
       {children}
     </div>
   );
