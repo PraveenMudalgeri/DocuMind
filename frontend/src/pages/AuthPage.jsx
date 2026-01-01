@@ -24,7 +24,7 @@ export function AuthPage() {
 
     useEffect(() => {
         if (!isLoading && isAuthenticated) {
-            navigate(ROUTES.CHAT, { replace: true });
+            navigate(ROUTES.CHAT, { replace: true, state: { newChat: true } });
         }
     }, [isAuthenticated, isLoading, navigate]);
 
@@ -53,7 +53,7 @@ export function AuthPage() {
 
         try {
             await login(username, password);
-            navigate(ROUTES.CHAT);
+            navigate(ROUTES.CHAT, { state: { newChat: true } });
         } catch (error) {
             console.error('Login error:', error);
             showToast({
