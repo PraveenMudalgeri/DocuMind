@@ -10,7 +10,8 @@ export function DatabaseConnectionPanel({
     onDisconnect,
     onSelectConnection,
     isConnecting,
-    onClose // New prop
+    onClose, // New prop
+    onVisualize // New prop for visualization navigation
 }) {
     const [showSchemaViewer, setShowSchemaViewer] = useState(false);
     const [selectedConnectionForSchema, setSelectedConnectionForSchema] = useState(null);
@@ -81,6 +82,7 @@ export function DatabaseConnectionPanel({
                                 onSelect={onSelectConnection}
                                 onDisconnect={onDisconnect}
                                 onViewSchema={handleViewSchema}
+                                onVisualize={onVisualize}
                             />
                         ))}
                     </>

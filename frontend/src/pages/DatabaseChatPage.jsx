@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Header } from '../components/layout/Header';
 import { DatabaseConnectionPanel } from '../components/database/DatabaseConnectionPanel';
 import { DatabaseChatInterface } from '../components/database/DatabaseChatInterface';
@@ -10,6 +11,7 @@ export function DatabaseChatPage() {
     const [activeConnectionId, setActiveConnectionId] = useState(null);
     const [isConnecting, setIsConnecting] = useState(false);
     const { showToast } = useToast();
+    const navigate = useNavigate();
 
     const handleConnect = async (connectionString) => {
         try {
@@ -55,6 +57,11 @@ export function DatabaseChatPage() {
 
     const handleSelectConnection = (connectionId) => {
         setActiveConnectionId(connectionId);
+    };
+
+    const handleVisualize = (connectionId, databaseType) => {
+        // Navigate to visualization page with connection details
+        navigate(`/database-visualization?connectionId=${connectionId}&databaseType=${databaseType}`);
     };
 
     const handleExecuteQuery = async (connectionId, query) => {
@@ -116,6 +123,7 @@ export function DatabaseChatPage() {
                         }}
                         isConnecting={isConnecting}
                         onClose={() => setShowSidebar(false)}
+                        onVisualize={handleVisualize}
                     />
                 </div>
 

@@ -23,14 +23,52 @@ class SQLAnalysisService:
                 - SQLite: sqlite:///path/to/db.sqlite
         """
         try:
-            engine = create_engine(connection_string, pool_pre_ping=True)
+            # Validate connection string format
+            if not connection_string or '://' not in connection_string:
+                raise ValueError("Invalid connection string format. Expected format: scheme://user:pass@host:port/database")
+            
+            # For PostgreSQL, add connection arguments to force IPv4 and increase timeout
+            connect_args = {}
+            if connection_string.startswith('postgresql'):
+                connect_args = {
+                    'connect_timeout': 30,
+                    'keepalives': 1,
+                    'keepalives_idle': 30,
+                    'keepalives_interval': 10,
+                    'keepalives_count': 5
+                }
+            
+            # Create engine with additional parameters for better compatibility
+            engine = create_engine(
+                connection_string, 
+                pool_pre_ping=True,
+                pool_recycle=3600,
+                connect_args=connect_args
+            )
+            
             # Test connection
             with engine.connect() as conn:
                 conn.execute(text("SELECT 1"))
+            
             self._connections[connection_id] = engine
             return True
+        except ValueError as ve:
+            raise Exception(f"Invalid connection string: {str(ve)}")
         except Exception as e:
-            raise Exception(f"Failed to connect to database: {str(e)}")
+            error_msg = str(e)
+            # Provide more helpful error messages
+            if 'password authentication failed' in error_msg.lower():
+                raise Exception("Authentication failed: Invalid username or password")
+            elif 'could not connect' in error_msg.lower() or 'connection refused' in error_msg.lower():
+                raise Exception("Could not connect to database server. Please check host and port")
+            elif 'network is unreachable' in error_msg.lower():
+                raise Exception("Network unreachable: The server cannot connect to your database. If using Supabase, try enabling 'Connection Pooler' mode or check IP allowlist settings.")
+            elif 'database' in error_msg.lower() and 'does not exist' in error_msg.lower():
+                raise Exception("Database does not exist")
+            elif 'no such table' in error_msg.lower():
+                raise Exception("Database exists but appears to be empty or has no accessible tables")
+            else:
+                raise Exception(f"Failed to connect to database: {error_msg}")
     
     def disconnect_database(self, connection_id: str) -> bool:
         """Disconnect and remove a database connection"""

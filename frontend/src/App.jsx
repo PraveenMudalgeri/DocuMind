@@ -9,6 +9,7 @@ import { ChatPage } from './pages/ChatPage';
 import { DocumentsListPage } from './pages/DocumentsListPage';
 import { DocumentsPage } from './pages/DocumentsPage';
 import { DatabaseChatPage } from './pages/DatabaseChatPage';
+import { DatabaseVisualizationPage } from './pages/DatabaseVisualizationPage';
 import { AccountPage } from './pages/AccountPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { ROUTES } from './utils/constants';
@@ -52,6 +53,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <DatabaseChatPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/database-visualization"
+                element={
+                  <ProtectedRoute>
+                    <DatabaseVisualizationPage />
                   </ProtectedRoute>
                 }
               />

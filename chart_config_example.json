@@ -1,0 +1,126 @@
+{
+  "chart_config_example": {
+    "description": "Example ChartConfig structure returned by the visualization API",
+    "examples": [
+      {
+        "chart_id": "overview_row_counts",
+        "chart_type": "bar",
+        "title": "Database Overview: Row Counts by Table",
+        "description": "Total rows across 7 tables in postgresql database",
+        "data": [
+          { "table": "employees", "rows": 18 },
+          { "table": "departments", "rows": 7 },
+          { "table": "customers", "rows": 50 },
+          { "table": "products", "rows": 24 },
+          { "table": "orders", "rows": 200 },
+          { "table": "order_items", "rows": 627 },
+          { "table": "categories", "rows": 8 }
+        ],
+        "x_axis": "table",
+        "y_axis": "rows",
+        "x_label": "Table Name",
+        "y_label": "Number of Rows"
+      },
+      {
+        "chart_id": "stats_orders_total_amount",
+        "chart_type": "bar",
+        "title": "orders: total_amount Statistics",
+        "description": "Numeric summary for total_amount column",
+        "data": [
+          { "metric": "Min", "value": 15.99 },
+          { "metric": "Max", "value": 599.95 },
+          { "metric": "Average", "value": 147.32 }
+        ],
+        "x_axis": "metric",
+        "y_axis": "value",
+        "x_label": "Metric",
+        "y_label": "Value"
+      },
+      {
+        "chart_id": "table_distribution",
+        "chart_type": "pie",
+        "title": "Data Distribution Across Tables",
+        "description": "Percentage of total rows per table",
+        "data": [
+          { "table": "employees", "rows": 18 },
+          { "table": "departments", "rows": 7 },
+          { "table": "customers", "rows": 50 },
+          { "table": "products", "rows": 24 },
+          { "table": "orders", "rows": 200 },
+          { "table": "order_items", "rows": 627 },
+          { "table": "categories", "rows": 8 }
+        ],
+        "x_axis": "table",
+        "y_axis": "rows",
+        "x_label": "Table",
+        "y_label": "Rows"
+      },
+      {
+        "chart_id": "custom_orders_status",
+        "chart_type": "bar",
+        "title": "orders: SUM(total_amount)",
+        "description": "Custom visualization: sum of total_amount by status",
+        "data": [
+          { "status": "Completed", "total_amount": 45280.50 },
+          { "status": "Processing", "total_amount": 12340.75 },
+          { "status": "Shipped", "total_amount": 8920.25 },
+          { "status": "Cancelled", "total_amount": 2100.00 }
+        ],
+        "x_axis": "status",
+        "y_axis": "total_amount",
+        "x_label": "Status",
+        "y_label": "Sum(total_amount)"
+      }
+    ]
+  },
+  "usage_notes": {
+    "backend": "The backend generates these ChartConfig objects using safe SQL aggregations (COUNT, SUM, AVG, MIN, MAX). No LLM-generated SQL is used.",
+    "frontend": "The frontend Chart component renders these configs using Recharts library. The component is database-agnostic and doesn't know about specific table structures.",
+    "chart_types": {
+      "bar": "Best for comparing categories or showing distributions",
+      "line": "Best for time-series or trend data",
+      "pie": "Best for showing proportions/percentages",
+      "table": "Best for displaying raw data"
+    },
+    "data_format": "Data is always an array of objects where keys are column names and values are the data points. The x_axis and y_axis fields tell the Chart component which keys to use for plotting."
+  },
+  "api_endpoints": {
+    "get_metadata": {
+      "method": "POST",
+      "endpoint": "/api/visualization/metadata",
+      "request": {
+        "connection_id": "uuid-string",
+        "include_statistics": true,
+        "max_tables": null
+      },
+      "response": {
+        "success": true,
+        "connection_id": "uuid-string",
+        "database_type": "postgresql",
+        "total_tables": 7,
+        "total_rows": 934,
+        "tables": "[Array of TableMetadata]",
+        "statistics": "[Array of TableStatistics]",
+        "suggested_charts": "[Array of ChartConfig - shown above]"
+      }
+    },
+    "generate_custom": {
+      "method": "POST",
+      "endpoint": "/api/visualization/custom",
+      "request": {
+        "connection_id": "uuid-string",
+        "table_name": "orders",
+        "chart_type": "bar",
+        "dimension_column": "status",
+        "metric_column": "total_amount",
+        "aggregation": "sum",
+        "limit": 20,
+        "order_by": "desc"
+      },
+      "response": {
+        "success": true,
+        "chart_config": "{ChartConfig object - see examples above}"
+      }
+    }
+  }
+}

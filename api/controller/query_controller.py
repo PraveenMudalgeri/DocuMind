@@ -47,8 +47,21 @@ class QueryController:
             # Generate unique connection ID
             connection_id = str(uuid.uuid4())
             
+            # Log connection attempt (mask password in logs)
+            masked_conn = connection_request.connection_string
+            if '@' in masked_conn and '://' in masked_conn:
+                parts = masked_conn.split('://')
+                if len(parts) == 2 and '@' in parts[1]:
+                    cred_part = parts[1].split('@')[0]
+                    if ':' in cred_part:
+                        user = cred_part.split(':')[0]
+                        rest = parts[1].split('@', 1)[1]
+                        masked_conn = f"{parts[0]}://{user}:****@{rest}"
+            
+            logger.info(f"Attempting to connect to database: {masked_conn}")
+            logger.info(f"Connection ID: {connection_id}")
+            
             # Attempt to connect
-            logger.info(f"Attempting to connect to database with ID: {connection_id}")
             success = self.sql_analysis_service.connect_database(
                 connection_id=connection_id,
                 connection_string=connection_request.connection_string
@@ -61,27 +74,35 @@ class QueryController:
                 )
             
             # Extract schema and cache it
+            logger.info(f"Extracting schema for connection {connection_id}")
             schema = self.sql_analysis_service.get_logical_schema(connection_id)
             self._schema_cache[connection_id] = schema
             
             database_type = schema.get("database_type", "unknown")
+            table_count = len(schema.get("tables", []))
             
-            logger.info(f"Successfully connected to {database_type} database")
+            logger.info(f"Successfully connected to {database_type} database with {table_count} tables")
             
             return DatabaseConnectionResponse(
                 success=True,
                 connection_id=connection_id,
                 database_type=database_type,
-                message=f"Successfully connected to {database_type} database"
+                message=f"Successfully connected to {database_type} database with {table_count} tables"
             )
             
         except HTTPException:
             raise
         except Exception as e:
-            logger.error(f"Database connection failed: {str(e)}")
+            error_message = str(e)
+            logger.error(f"Database connection failed: {error_message}")
+            
+            # Extract clean error message
+            if "Failed to connect to database:" in error_message:
+                error_message = error_message.replace("Failed to connect to database:", "").strip()
+            
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Database connection failed: {str(e)}"
+                detail=error_message
             )
     
     async def execute_natural_language_query(
