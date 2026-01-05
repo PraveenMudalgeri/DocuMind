@@ -5,7 +5,24 @@ export const ToastContext = createContext(null);
 export function ToastProvider({ children }) {
   const [toasts, setToasts] = useState([]);
 
-  const showToast = useCallback(({ type = 'info', message, duration = 4000 }) => {
+  const showToast = useCallback((messageOrOptions, typeOrDuration) => {
+    // Support both calling patterns:
+    // showToast('message', 'success') - legacy
+    // showToast({ message: 'message', type: 'success' }) - new
+    let message, type, duration;
+    
+    if (typeof messageOrOptions === 'string') {
+      // Legacy pattern: showToast(message, type)
+      message = messageOrOptions;
+      type = typeOrDuration || 'info';
+      duration = 4000;
+    } else {
+      // New pattern: showToast({ message, type, duration })
+      message = messageOrOptions.message;
+      type = messageOrOptions.type || 'info';
+      duration = messageOrOptions.duration !== undefined ? messageOrOptions.duration : 4000;
+    }
+
     const id = Date.now();
     setToasts(prev => [...prev, { id, type, message }]);
 

@@ -10,9 +10,13 @@ from routes.chat import router as chat_router
 from routes.export import router as export_router
 from routes.speech import router as speech_router
 from routes.query_routes import router as query_router
+from routes.visualization import router as visualization_router
 from service.infrastructure.database_service import database_service
 from service.rag.pinecone_service import pinecone_service
 from service.rag.gemini_service import gemini_service
+from service.features.sql_analysis_service import sql_analysis_service
+from service.features.database_visualization_service import DatabaseVisualizationService
+import service.features.database_visualization_service as viz_service_module
 
 # --- Logging configuration ---
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -49,6 +53,13 @@ async def lifespan(app: FastAPI):
         logger.error(f"Failed to initialize Gemini: {e}")
 
     logger.info("Initialized Groq service.")
+    
+    # Initialize Database Visualization Service
+    try:
+        viz_service_module.database_visualization_service = DatabaseVisualizationService(sql_analysis_service)
+        logger.info("Initialized Database Visualization service.")
+    except Exception as e:
+        logger.error(f"Failed to initialize Database Visualization service: {e}")
 
     yield  # Application is running
 
@@ -90,6 +101,7 @@ app.include_router(chat_router)
 app.include_router(export_router)
 app.include_router(speech_router)
 app.include_router(query_router)
+app.include_router(visualization_router)
 
 # --- Main entry point for local development ---
 if __name__ == "__main__":

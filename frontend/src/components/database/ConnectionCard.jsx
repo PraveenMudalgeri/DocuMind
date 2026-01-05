@@ -54,22 +54,23 @@ export function ConnectionCard({ connection, isActive, onSelect, onDisconnect, o
                 </div>
             </div>
 
+            {/* Action buttons */}
             <div className="flex gap-2 mt-3">
                 <button
                     onClick={(e) => {
                         e.stopPropagation();
                         onViewSchema(connection.id);
                     }}
-                    className="flex-1 px-2 py-1 text-xs font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded transition-colors"
+                    className="flex-1 px-2 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded transition-colors"
                 >
-                    Schema
+                    View Schema
                 </button>
                 <button
                     onClick={(e) => {
                         e.stopPropagation();
                         onDisconnect(connection.id);
                     }}
-                    className="flex-1 px-2 py-1 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded transition-colors"
+                    className="flex-1 px-2 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded transition-colors"
                 >
                     Disconnect
                 </button>
