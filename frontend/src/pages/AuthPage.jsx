@@ -98,13 +98,13 @@ export function AuthPage() {
     };
 
     return (
-        <div className="h-screen bg-slate-50 flex flex-col items-center justify-center px-6 overflow-hidden">
-            <div className="w-full max-w-md flex flex-col pt-4">
+        <div className="h-screen bg-slate-50 flex flex-col items-center justify-center px-4 overflow-hidden">
+            <div className={`w-full max-w-md flex flex-col ${isLogin ? 'scale-90' : 'scale-[0.82]'}`}>
 
                 {/* Return to Home Button */}
                 <button
                     onClick={() => navigate(ROUTES.HOME)}
-                    className="mb-6 flex items-center gap-2.5 px-4 py-2 bg-white/50 backdrop-blur-md border border-slate-200 rounded-full text-slate-500 hover:text-indigo-600 hover:border-indigo-100 hover:bg-white transition-all group self-start shadow-sm"
+                    className="mb-3 flex items-center gap-2 px-3 py-1.5 bg-white/50 backdrop-blur-md border border-slate-200 rounded-full text-slate-500 hover:text-indigo-600 hover:border-indigo-100 hover:bg-white transition-all group self-start shadow-sm"
                 >
                     <svg className="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -113,18 +113,18 @@ export function AuthPage() {
                 </button>
 
                 {/* Logo - Optimized for the vertical image provided with curved border */}
-                <div className="flex flex-col items-center mb-4">
-                    <div className="flex items-center justify-center gap-3 mb-2">
+                <div className="flex flex-col items-center mb-2">
+                    <div className="flex items-center justify-center gap-3 mb-1">
                         <img
                             src="/brand-logo.png"
                             alt="QueryWise"
-                            className="h-16 w-auto object-contain"
+                            className="h-12 w-auto object-contain"
                         />
                     </div>
                 </div>
 
                 <Card padding="lg">
-                    <div className="mb-8 pb-2 border-b border-slate-100 flex gap-8 justify-center">
+                    <div className="mb-4 pb-2 border-b border-slate-100 flex gap-8 justify-center">
                         <button
                             onClick={() => setIsLogin(true)}
                             className={`text-lg font-bold transition-all ${isLogin ? 'text-slate-900 border-b-2 border-orange-500 -mb-[9px]' : 'text-slate-400 hover:text-slate-600'}`}
@@ -139,13 +139,13 @@ export function AuthPage() {
                         </button>
                     </div>
 
-                    <p className="text-slate-600 mb-6">
+                    <p className="text-slate-600 mb-4 text-sm">
                         {isLogin
                             ? "Welcome back! Sign in to continue."
                             : "Join QueryWise to start chatting with your documents."}
                     </p>
 
-                    <form onSubmit={isLogin ? handleLogin : handleSignup} className="space-y-4">
+                    <form onSubmit={isLogin ? handleLogin : handleSignup} className={isLogin ? "space-y-3" : "space-y-2.5"}>
                         <Input
                             label="Username"
                             type="text"
@@ -185,13 +185,13 @@ export function AuthPage() {
                             />
                         )}
 
-                        <Button type="submit" loading={loading} className="w-full mt-2 py-3.5">
+                        <Button type="submit" loading={loading} className="w-full mt-1 py-2.5">
                             {isLogin ? "Sign In" : "Create Account"}
                         </Button>
                     </form>
 
                     {isLogin && (
-                        <div className="mt-6 text-center">
+                        <div className="mt-4 text-center">
                             <button
                                 onClick={() => setIsLogin(false)}
                                 className="text-sm text-slate-500 hover:text-orange-600 transition-colors"
